@@ -25,17 +25,30 @@ g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA", "
 wdi <- filter(idata, source_id == "WDI_2015",
               variable %in% vars, unit %in% c("bn USD2005/yr", "million", "km2"))
 
+ssp_gdp <- filter(idata, source_id == "SSP", model == "OECD Env-Growth",
+              variable == "GDP",
+              unit == "bn USD2005/yr")
+
+ssp_pop <- filter(idata, source_id == "SSP", model == "IIASA-WiC POP",
+              variable == "Population",
+              unit == "million")
+
+df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
+
+rm(wdi, ssp_pop, ssp_gdp) # clean up
+
+# rename variables
 for (var in vars){
-  wdi <- rename_var(wdi, var, names(vars)[vars == var])
+  df <- rename_var(df, var, names(vars)[vars == var])
 }
 
 # store units
-units <- distinct(wdi, variable, unit)
+units <- distinct(df, variable, unit)
 
-wdi <- dcast(wdi, spatial + temporal ~ variable)
+df <- dcast(df, source_id + model + scenario + spatial + temporal ~ variable)
 
 # compute per capita values
-wdi <- mutate(wdi, gdp_pc = gdp / pop,
+df <- mutate(df, gdp_pc = gdp / pop,
                    va_agr_pc = va_agr / pop,
                    va_ind_pc = va_ind / pop,
                    va_man_pc = va_man / pop,
@@ -45,28 +58,23 @@ wdi <- mutate(wdi, gdp_pc = gdp / pop,
                   )
 
 # calculate growth rates
-wdi <- group_by(wdi, spatial) %>%
-          mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) / lag(va_agr_pc, n = 1, order_by = temporal) - 1,
-                 va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) / lag(va_ind_pc, n = 1, order_by = temporal) - 1,
-                 va_agrind_pc_gr = lag(va_agrind_pc, n = 0, order_by = temporal) / lag(va_agrind_pc, n = 1, order_by = temporal) - 1,
-                 va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) / lag(va_ser_pc, n = 1, order_by = temporal) - 1,
-                 gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) / lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
-          ungroup()
+df <- group_by(df, source_id, model, scenario, spatial) %>%
+  mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) / lag(va_agr_pc, n = 1, order_by = temporal) - 1,
+         va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) / lag(va_ind_pc, n = 1, order_by = temporal) - 1,
+         va_agrind_pc_gr = lag(va_agrind_pc, n = 0, order_by = temporal) / lag(va_agrind_pc, n = 1, order_by = temporal) - 1,
+         va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) / lag(va_ser_pc, n = 1, order_by = temporal) - 1,
+         gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) / lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
+  ungroup()
 
-# add recession dummy
-wdi$recession <- NA
-wdi[wdi$gdp_pc_gr > 0 & !(is.na(wdi$gdp_pc_gr)), "recession"] <- 0
-wdi[wdi$gdp_pc_gr <= 0 & !(is.na(wdi$gdp_pc_gr)), "recession"] <- 1
+# add recession dummy: 1 in case of a recession
+df$recession <- NA
+df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
+df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
-# estimation
-model_agr <- lm(va_agr_pc_gr ~ gdp_pc + I(gdp_pc^2) + factor(spatial) +
-                  recession + pop_dens, data = filter(wdi, spatial %in% g20))
-model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + factor(spatial) +
-                  recession + pop_dens, data = filter(wdi, spatial %in% g20))
-model_agrind <- lm(va_agrind_pc_gr ~ gdp_pc + I(gdp_pc^2) + factor(spatial) +
-                  recession, data = filter(wdi, spatial %in% g20))
-model_agrind_nofe <- lm(va_agrind_pc_gr ~ gdp_pc + I(gdp_pc^2) +
-                  recession, data = filter(wdi, spatial %in% g20))
+# estimation ----
+model_agr <- lm(va_agr_pc_gr ~ gdp_pc + recession, data = df)
+model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + spatial +
+                  recession + pop_dens, data = filter(df, spatial %in% g20))
 
-# generate plots ----
+# plotting ----
 source("plotting.R")
