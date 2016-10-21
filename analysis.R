@@ -136,7 +136,7 @@ df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
                                                    unique(df_hist$spatial))))
 
 model_agr <- lm(va_agr_pc_gr ~ gdp_pc + recession, data = df_hist)
-model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + spatial +
+model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
 
 # prediction ----
@@ -215,29 +215,9 @@ df_scen <- mutate(df_scen, va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
                            va_ser = va_ser_pc * pop)
 
 
-df_result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>% rbind(df_hist)
-
-for(i in seq(5)){
-  tmp_plot <- filter(df_result, spatial %in% sample(unique(df_scen$spatial),20),
-                     scenario == "SSP2", temporal <= 2050) %>%
-    select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
-
-tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
-
-tmp_plot_area <- filter(tmp_plot, variable != "gdp")
-tmp_plot_line <- filter(tmp_plot, variable == "gdp")
-
-
-ggplot() +
-  geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable)) +
-  geom_line(data = tmp_plot_line, aes(x = temporal, y = value)) +
-  ylab("bn USD2005/yr") +
-  xlab("") +
-  facet_wrap(~spatial, scales = "free")
-ggsave(file = paste0("SC_rand", i, ".png"), width = 20, height = 15,
-       units = "cm")
-}
-
+df_result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
+  rbind(df_hist) %>%
+  arrange(spatial)
 
 # plotting ----
 source("plotting.R")

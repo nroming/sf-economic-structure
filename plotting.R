@@ -49,3 +49,38 @@ ggplot() +
   # geom_smooth(data = df_plot, aes(x = gdp_pc, y = va_ser_pc_gr), method = lm, colour = "red")
 ggsave(filename = "plots/va_sec_pc_gr_over_gdp_pc.png", width = 14, height = 14,
        units = "cm")
+
+
+# absolute value added per sector for all countries
+tmp_plot <- filter(df_result, scenario == "SSP2", temporal <= 2050) %>%
+  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
+
+countries <- sort(as.character(unique(df_result$spatial)))
+
+num_pages <- length(countries) %/% 20
+
+start_country <- 1
+
+pdf("plots/country_results.pdf")
+for(i in seq(num_pages)){
+
+  tmp_plot_area <- filter(tmp_plot, variable != "gdp",
+                          spatial %in% countries[start_country:(start_country + 19)])
+  tmp_plot_line <- filter(tmp_plot, variable == "gdp",
+                          spatial %in% countries[start_country:(start_country + 19)])
+
+  start_country <- start_country + 20
+
+  p <- ggplot()
+    p <- p + geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable))
+    p <- p + geom_line(data = tmp_plot_line, aes(x = temporal, y = value))
+    p <- p + ylab("bn USD2005/yr")
+    p <- p + xlab("")
+    p <- p + theme_bw(base_size = 9)
+    p <- p + theme(legend.position = "none")
+    p <- p + facet_wrap(~spatial, scales = "free")
+    print(p)
+}
+dev.off()
