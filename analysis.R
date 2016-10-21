@@ -4,8 +4,12 @@ library(ggplot2)
 
 rm(list = ls())
 
+# set warning level
+options(warn = -1)
+
 # create output directories
 if(!dir.exists("plots")) dir.create("plots", showWarnings = FALSE)
+if(!dir.exists("cache")) dir.create("cache", showWarnings = FALSE)
 
 # prepare data ----
 # vector of variables
@@ -22,59 +26,201 @@ vars <- c("gdp" = "GDP",
 # sectoral data present for Canada)
 g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA", "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
 
-wdi <- filter(idata, source_id == "WDI_2015",
-              variable %in% vars, unit %in% c("bn USD2005/yr", "million", "km2"))
+if(!file.exists(("cache/df.rda"))){
+  message("Reading and preparing data from scratch. This takes a few seconds.")
+  wdi <- filter(idata, source_id == "WDI_2015", variable %in% vars,
+                unit %in% c("bn USD2005/yr", "million", "km2"))
 
-ssp_gdp <- filter(idata, source_id == "SSP", model == "OECD Env-Growth",
-              variable == "GDP",
-              unit == "bn USD2005/yr")
+  ssp_gdp <- filter(idata, source_id == "SSP", model == "OECD Env-Growth",
+                    variable == "GDP",
+                    unit == "bn USD2005/yr",
+                    temporal >= 2010)
 
-ssp_pop <- filter(idata, source_id == "SSP", model == "IIASA-WiC POP",
-              variable == "Population",
-              unit == "million")
+  ssp_gdp <- interpolate_missing_years(ssp_gdp)
 
-df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
+  ssp_pop <- filter(idata, source_id == "SSP", model == "IIASA-WiC POP",
+                    variable == "Population",
+                    unit == "million",
+                    temporal >= 2010)
 
-rm(wdi, ssp_pop, ssp_gdp) # clean up
+  ssp_pop <- interpolate_missing_years(ssp_pop)
 
-# rename variables
-for (var in vars){
-  df <- rename_var(df, var, names(vars)[vars == var])
+  df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
+
+  # df <- filter(df, spatial %in% g20)
+
+  rm(wdi, ssp_pop, ssp_gdp) # clean up
+
+  # rename variables
+  for (var in vars){
+    df <- rename_var(df, var, names(vars)[vars == var])
+  }
+
+  # drop information on source_id and model as it messes up converting to a wide
+  # dataframe
+  df <- select(df, -source_id, -model)
+
+  # store units
+  units <- distinct(df, variable, unit)
+
+  df <- dcast(df, scenario + spatial + temporal ~ variable)
+
+  # compute per capita values
+  df <- mutate(df, gdp_pc = gdp / pop,
+               va_agr_pc = va_agr / pop,
+               va_ind_pc = va_ind / pop,
+               va_man_pc = va_man / pop,
+               va_ser_pc = va_ser / pop,
+               va_agrind_pc = va_agr_pc + va_ind_pc,
+               pop_dens = pop / area
+  )
+
+  # calculate growth rates
+  df <- group_by(df, scenario, spatial) %>%
+    mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) / lag(va_agr_pc, n = 1, order_by = temporal) - 1,
+           va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) / lag(va_ind_pc, n = 1, order_by = temporal) - 1,
+           va_agrind_pc_gr = lag(va_agrind_pc, n = 0, order_by = temporal) / lag(va_agrind_pc, n = 1, order_by = temporal) - 1,
+           va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) / lag(va_ser_pc, n = 1, order_by = temporal) - 1,
+           gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) / lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
+    ungroup()
+
+  # add recession dummy: 1 in case of a recession
+  df$recession <- NA
+  df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
+  df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
+
+  # write data to disk
+  saveRDS(df, "cache/df.rda")
+} else {
+  message("Reading previously saved prepared data to save time. Delete 'cache' directory to read and prepare data from scratch.")
+  df <- readRDS("cache/df.rda")
 }
 
-# store units
-units <- distinct(df, variable, unit)
-
-df <- dcast(df, source_id + model + scenario + spatial + temporal ~ variable)
-
-# compute per capita values
-df <- mutate(df, gdp_pc = gdp / pop,
-                   va_agr_pc = va_agr / pop,
-                   va_ind_pc = va_ind / pop,
-                   va_man_pc = va_man / pop,
-                   va_ser_pc = va_ser / pop,
-                   va_agrind_pc = va_agr_pc + va_ind_pc,
-                   pop_dens = pop / area
-                  )
-
-# calculate growth rates
-df <- group_by(df, source_id, model, scenario, spatial) %>%
-  mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) / lag(va_agr_pc, n = 1, order_by = temporal) - 1,
-         va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) / lag(va_ind_pc, n = 1, order_by = temporal) - 1,
-         va_agrind_pc_gr = lag(va_agrind_pc, n = 0, order_by = temporal) / lag(va_agrind_pc, n = 1, order_by = temporal) - 1,
-         va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) / lag(va_ser_pc, n = 1, order_by = temporal) - 1,
-         gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) / lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
-  ungroup()
-
-# add recession dummy: 1 in case of a recession
-df$recession <- NA
-df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
-df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
-
 # estimation ----
-model_agr <- lm(va_agr_pc_gr ~ gdp_pc + recession, data = df)
+# relevel countries so that the US are used as reference for the fixed effects
+# estimation below
+# which country shall serve as reference
+country_ref = "USA"
+df <- mutate(df, spatial = relevel(spatial, ref = country_ref))
+
+# split up data into separate dataframes for historic and scenario data
+df_hist <- filter(df, scenario == "history")
+df_scen <- filter(df, scenario != "history")
+
+# for some countries (e.g. Aruba (ABW)) only histroic population is available.
+# need to filter out such cases as we need a list of countries for which
+# estimation is actually possible to limit the scenario dataset, which is used
+# for prediction, to these
+df_hist <- filter(df_hist, !is.na(gdp), !is.na(pop))
+
+# attach information about country area
+country_area <- filter(df_hist, temporal == 2010) %>%
+                  select(spatial, area) %>%
+                  distinct() %>%
+                  na.omit()
+
+# drop old area column (only NAs)
+df_scen <- select(df_scen, -area)
+# attach country area information
+df_scen <- inner_join(df_scen, country_area, by = c("spatial"))
+
+# calculate population density
+df_scen <- mutate(df_scen, pop_dens = pop/area)
+
+# limit scenario data to countries that are present in the historic data
+df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial), unique(df_hist$spatial))))
+
+# for some countries, only a subset of h
+
+model_agr <- lm(va_agr_pc_gr ~ gdp_pc + recession, data = df_hist)
 model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + spatial +
-                  recession + pop_dens, data = filter(df, spatial %in% g20))
+                  recession + pop_dens, data = df_hist)
+
+# prediction ----
+# agriculture
+df_scen$va_agr_pc_gr <- predict(model_agr, newdata = df_scen)
+
+# industry
+# due to the fixed effect prediction can only be done for countries for which estimation has been carried out
+countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
+
+df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc_gr"] <-
+  predict(model_ind, newdata = filter(df_scen, spatial %in% countries_ind))
+
+# filter out NA growth rates
+df_scen <- filter(df_scen, !is.na(va_ind_pc_gr))
+
+# replace negative growth rates with zeros
+# df_scen[df_scen$va_agr_pc_gr < 0, "va_agr_pc_gr"] <- 0
+# df_scen[df_scen$va_ind_pc_gr < 0, "va_ind_pc_gr"] <- 0
+
+# calculate service sector growth rate
+df_scen <- mutate(df_scen,
+                    va_ser_pc_gr = gdp_pc_gr - va_agr_pc_gr - va_ind_pc_gr)
+
+
+# use 2010 historical value as start
+df_hist_start <- filter(df_hist, temporal == 2010)
+
+# just to be sure, limit scenario data to years after that
+df_scen <- filter(df_scen, temporal > 2010)
+
+for(scen in paste0("SSP", 1:5)){
+  tmp <- mutate(df_hist_start, scenario = scen)
+  df_scen <- rbind(df_scen, tmp)
+}
+
+rm(tmp)
+
+df_scen <- arrange(df_scen, scenario, spatial, temporal)
+
+# compute sectoral value added per capita
+for(scen in unique(df_scen$scenario)){
+  for (country in unique(df_scen$spatial)){
+    # compute growth factor (*_grf) relative to base year
+    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_agr_pc_grf"] <-
+      cumprod(df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_agr_pc_gr"] + 1)
+    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_ind_pc_grf"] <-
+      cumprod(df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_ind_pc_gr"] + 1)
+
+    # apply growth factor to base year value
+    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_agr_pc"] <-
+      df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_agr_pc_grf"] *
+      as.numeric(df_scen[df_scen$spatial == country & df_scen$temporal == 2010 & df_scen$scenario == scen, "va_agr_pc"])
+
+    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_ind_pc"] <-
+      df_scen[df_scen$spatial == country & df_scen$temporal > 2010 & df_scen$scenario == scen, "va_ind_pc_grf"] *
+      as.numeric(df_scen[df_scen$spatial == country & df_scen$temporal == 2010 & df_scen$scenario == scen, "va_ind_pc"])
+  }
+}
+
+# compute service sector as residual and level values
+df_scen <- mutate(df_scen, va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
+                           va_agr = va_agr_pc * pop,
+                           va_ind = va_ind_pc * pop,
+                           va_ser = va_ser_pc * pop)
+
+
+df_result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>% rbind(df_hist)
+
+for(i in seq(5)){
+  tmp_plot <- filter(df_result, spatial %in% sample(unique(df_scen$spatial), 20), scenario == "SSP2", temporal <= 2050) %>% select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
+
+tmp_plot_area <- filter(tmp_plot, variable != "gdp")
+tmp_plot_line <- filter(tmp_plot, variable == "gdp")
+
+
+ggplot() +
+  geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable)) +
+  geom_line(data = tmp_plot_line, aes(x = temporal, y = value)) +
+  ylab("bn USD2005/yr") +
+  xlab("") +
+  facet_wrap(~spatial, scales = "free")
+ggsave(file = paste0("SC_rand", i, ".png"), width = 20, height = 15, units = "cm")
+}
+
 
 # plotting ----
 source("plotting.R")
