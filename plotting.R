@@ -21,10 +21,12 @@ ggplot() +
   ylab("") +
   xlab("") +
   facet_wrap( ~ spatial, scales = "free", nrow = 4)
-ggsave(filename = "plots/va_sec_pc_over_gdp_pc.png", height = 20, width = 16, units = "cm")
+ggsave(filename = "plots/va_sec_pc_over_gdp_pc.png", height = 20, width = 16,
+       units = "cm")
 
 # plot growth rates over GDP per capita ---
-df_plot <- select(df, spatial, temporal, va_agr_pc_gr, va_ind_pc_gr, va_ser_pc_gr, gdp_pc, gdp_pc_gr) %>%
+df_plot <- select(df, spatial, temporal, va_agr_pc_gr, va_ind_pc_gr,
+                  va_ser_pc_gr, gdp_pc, gdp_pc_gr) %>%
              filter(spatial %in% g20, gdp_pc_gr >= 0)
 
 plot_alpha = 0.5
@@ -33,9 +35,10 @@ ggplot() +
   theme_bw() +
   ylab("sectoral growth rate") +
   # agriculture
-  geom_point(data = df_plot, aes(x = gdp_pc, y = va_agr_pc_gr), colour = "green",
-             alpha = plot_alpha) +
-  geom_smooth(data = df_plot, aes(x = gdp_pc, y = va_agr_pc_gr), method = lm, colour = "green") +
+  geom_point(data = df_plot, aes(x = gdp_pc, y = va_agr_pc_gr),
+             colour = "green", alpha = plot_alpha) +
+  geom_smooth(data = df_plot, aes(x = gdp_pc, y = va_agr_pc_gr), method = lm,
+              colour = "green") +
   # industry
   # geom_point(data = df_plot, aes(x = gdp_pc, y = va_ind_pc_gr), colour = "blue",
   #            alpha = plot_alpha) +
