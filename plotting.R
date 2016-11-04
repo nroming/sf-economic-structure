@@ -52,7 +52,7 @@ ggsave(filename = "plots/va_sec_pc_gr_over_gdp_pc.png", width = 14, height = 14,
 
 
 # absolute value added per sector for all countries
-tmp_plot <- filter(df_result, scenario == "SSP2", temporal <= 2050) %>%
+tmp_plot <- filter(df_result, scenario %in% c("SSP2", "history"), temporal <= 2050) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
 
 tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
