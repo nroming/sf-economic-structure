@@ -219,5 +219,19 @@ df_result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
   rbind(df_hist) %>%
   arrange(spatial)
 
+# regional aggregation ----
+map_region <- read.csv("sources/regions_definition.csv") %>%
+  select(ISO, reg11) %>%
+  filter(!(reg11 %in% c("INTship", "INTair", "glob"))) %>%
+  rename(spatial = ISO)
+
+df_result_reg <- inner_join(df_result, map_region, by = "spatial") %>%
+  group_by(scenario, temporal, reg11) %>%
+  summarise_each(funs(sum, "sum", sum(., na.rm = TRUE)), gdp, pop, va_ind, va_ser, va_agr) %>%
+  ungroup() %>%
+  rename(spatial = reg11)
+
+names(df_result_reg) <- gsub("_sum", "", names(df_result_reg), fixed = TRUE)
+
 # plotting ----
 source("plotting.R")
