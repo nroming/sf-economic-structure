@@ -215,7 +215,7 @@ df_scen <- mutate(df_scen, va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
                            va_ser = va_ser_pc * pop)
 
 
-df_result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
+result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
   rbind(df_hist) %>%
   arrange(spatial)
 
@@ -225,13 +225,19 @@ map_region <- read.csv("sources/regions_definition.csv") %>%
   filter(!(reg11 %in% c("INTship", "INTair", "glob"))) %>%
   rename(spatial = ISO)
 
-df_result_reg <- inner_join(df_result, map_region, by = "spatial") %>%
+result_reg <- inner_join(result, map_region, by = "spatial") %>%
   group_by(scenario, temporal, reg11) %>%
   summarise_each(funs(sum, "sum", sum(., na.rm = TRUE)), gdp, pop, va_ind, va_ser, va_agr) %>%
   ungroup() %>%
   rename(spatial = reg11)
 
-names(df_result_reg) <- gsub("_sum", "", names(df_result_reg), fixed = TRUE)
+names(result_reg) <- gsub("_sum", "", names(result_reg), fixed = TRUE)
+
+# compute regional sector shares
+result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
+                     share_agr = va_agr/sum_va,
+                     share_ind = va_ind/sum_va,
+                     share_ser = va_ser/sum_va)
 
 # plotting ----
 source("plotting.R")
