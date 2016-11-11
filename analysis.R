@@ -148,8 +148,13 @@ df_scen$va_agr_pc_gr <- predict(model_agr, newdata = df_scen)
 # estimation has been carried out
 countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
 
-df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc_gr"] <-
+# check if there are fixed effects present and predict accordingly
+if(length(countries_ind) > 1){
+  df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc_gr"] <-
   predict(model_ind, newdata = filter(df_scen, spatial %in% countries_ind))
+} else {
+  df_scen$va_ind_pc_gr = predict(model_ind, newdata = df_scen)
+}
 
 # filter out NA growth rates
 df_scen <- filter(df_scen, !is.na(va_ind_pc_gr))
