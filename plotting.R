@@ -189,3 +189,112 @@ ggplot() +
   facet_wrap(~ spatial)
 ggsave(filename = "plots/regions_sectoral_shares.png", width = 20, height = 28,
        units = "cm")
+
+# historical FE intensities by sector ----
+country <- "USA"
+
+iea <- filter(idata, source_id == "IEA_2014",
+              spatial == country,
+              temporal <= 2012,
+              variable %in% paste("Final Energy",
+                                   rep(c("Agriculture", "Industry", "Services"), 3),
+                                   rep(c("Solids", "Liquids", "Gases", "Heat", "Electricity"), 3), sep = "|"))
+
+iea$variable <- gsub("Final Energy|", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Agriculture|", "agr_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Industry|", "ind_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Services|", "ser_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Solids", "solid", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Liquids", "liquid", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Gases", "gas", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Heat", "heat", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Electricity", "elec", iea$variable, fixed = TRUE)
+
+iea <- dcast(iea, scenario + spatial + temporal ~ variable)
+
+tmp <- filter(df_hist, spatial == country) %>%
+  select(scenario, spatial, temporal, va_ind, va_agr, va_ser)
+
+iea <- inner_join(iea, tmp)
+
+iea <- mutate(iea, fei_agr_elec = agr_elec/va_agr,
+              fei_agr_solid = agr_solid/va_agr,
+              fei_agr_liquid = agr_liquid/va_agr,
+              fei_agr_gas = agr_gas/va_agr,
+              fei_agr_heat = agr_heat/va_agr,
+
+              fei_ind_elec = ind_elec/va_ind,
+              fei_ind_solid = ind_solid/va_ind,
+              fei_ind_liquid = ind_liquid/va_ind,
+              fei_ind_gas = ind_gas/va_ind,
+              fei_ind_heat = ind_heat/va_ind,
+
+              fei_ser_elec = ser_elec/va_ser,
+              fei_ser_solid = ser_solid/va_ser,
+              fei_ser_liquid = ser_liquid/va_ser,
+              fei_ser_gas = ser_gas/va_ser,
+              fei_ser_heat = ser_heat/va_ser)
+
+iea <- select(iea, spatial, temporal, fei_agr_elec:fei_ser_heat)
+
+iea <- melt(iea, id.vars = c("spatial", "temporal"))
+
+iea <- filter(iea, !is.na(value))
+
+iea$variable <- gsub("fei_", "", iea$variable, fixed = TRUE)
+
+iea$sector <- NA
+iea[grepl("agr", iea$variable), "sector"] <- "Agriculture"
+iea[grepl("ind", iea$variable), "sector"] <- "Industry"
+iea[grepl("ser", iea$variable), "sector"] <- "Services"
+
+iea$variable <- gsub("agr_", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("ind_", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("ser_", "", iea$variable, fixed = TRUE)
+
+iea <- mutate(iea, value = value * 1e6)
+
+ggplot() +
+  geom_line(data = iea, aes(x = temporal, y = value, group = variable,
+                            colour = variable), size = 1) +
+  theme_bw(base_size = 14) +
+  xlab("") +
+  ylab("GJ/bn USD2005") +
+  # scale_colour_manual(type = "qual", palette = 1) +
+  facet_wrap(~ sector)
+ggsave("plots/FEI_USA.png", width = 28, height = 18, units = "cm")
+
+# AR5 final energy demand pathways ----
+tmp <- filter(idata, source_id == "AR5",
+              scenario %in% c("LIMITS-RefPol", "LIMITS-RefPol-450"),
+              variable %in% c("Final Energy|Electricity",
+                              "Final Energy|Gases",
+                              "Final Energy|Heat",
+                              "Final Energy|Liquids",
+                              "Final Energy|Solids"),
+              temporal %in% c(2010, 2050),
+              model != "AIM-Enduse[Backcast] 1.0")
+
+tmp2010 <- filter(tmp, temporal == 2010)
+tmp2050 <- filter(tmp, temporal == 2050)
+
+tmp2010 <- filter(tmp2010, scenario == "LIMITS-RefPol") %>%
+  mutate(scenario = "2010")
+
+tmp <- rbind(tmp2010, tmp2050)
+
+tmp <- change_scenario(tmp, "LIMITS-RefPol", "BAU")
+tmp <- change_scenario(tmp, "LIMITS-RefPol-450", "2°C")
+
+tmp$variable <- gsub("Final Energy|", "", tmp$variable, fixed = TRUE)
+tmp$scenario <- ordered(tmp$scenario, levels = c("2010", "BAU", "2°C"))
+
+ggplot() +
+  geom_bar(data = tmp, aes(x = scenario, y = value, group = variable, fill = variable), stat = "identity") +
+  theme_bw(base_size = 12) +
+  ylab(unique(tmp$unit)) +
+  xlab("") +
+  ggtitle("Global final energy demand in 2050 with and without climate policy") +
+  facet_wrap(~ model) +
+  scale_fill_brewer(type = "qual", palette = 6)
+ggsave("plots/AR5_FE.png", width = 28, height = 15, units = "cm")
