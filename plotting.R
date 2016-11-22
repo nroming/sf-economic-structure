@@ -16,12 +16,24 @@ df_plot$spatial <- ordered(df_plot$spatial, levels = df_plot_recent$spatial)
 ggplot() +
   geom_point(data = df_plot, aes(x = gdp_pc, y = value, colour = variable)) +
   # geom_hline(yintercept = 10) +
-  theme_bw(base_size = 9) +
+  theme_bw(base_size = 12) +
   theme(legend.position = "bottom") +
-  ylab("") +
-  xlab("") +
-  facet_wrap( ~ spatial, scales = "free", nrow = 4)
-ggsave(filename = "plots/va_sec_pc_over_gdp_pc.png", height = 20, width = 16,
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap( ~ spatial, scales = "free", nrow = 3)
+ggsave(filename = "plots/va_sec_pc_over_gdp_pc_by_country.png", height = 16, width = 28,
+       units = "cm")
+
+ggplot() +
+  geom_point(data = df_plot, aes(x = gdp_pc, y = value, colour = variable)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita")
+ggsave(filename = "plots/va_sec_pc_over_gdp_pc.png", height = 16, width = 28,
        units = "cm")
 
 # plot growth rates over GDP per capita ---
