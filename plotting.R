@@ -104,6 +104,35 @@ for(i in seq(num_pages)){
 }
 dev.off()
 
+# G20 only
+tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
+                        temporal <= 2050, spatial %in% g20) %>%
+  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015,
+                        spatial %in% g20) %>%
+  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+tmp_plot <- rbind(tmp_plot_hist, tmp_plot_scen)
+
+rm(tmp_plot_scen, tmpe_plot_hist)
+
+tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
+
+tmp_plot_area <- filter(tmp_plot, variable != "gdp")
+tmp_plot_line <- filter(tmp_plot, variable == "gdp")
+
+ggplot() +
+  geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable)) +
+  geom_line(data = tmp_plot_line, aes(x = temporal, y = value)) +
+  scale_fill_brewer(type = "qual", palette = 2) +
+  ylab("bn USD2005/yr") +
+  xlab("") +
+  theme_bw(base_size = 9) +
+  theme(legend.position = "none") +
+  facet_wrap(~spatial, scales = "free")
+ggsave("plots/country_results_total_G20.png", width = 24, height = 12, units = "cm")
+
 ## GDP and sectoral value added per capita for all countries ----
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2050) %>%
   select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
