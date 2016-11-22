@@ -76,7 +76,7 @@ rm(tmp_plot_scen, tmpe_plot_hist)
 
 tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
 
-countries <- sort(as.character(unique(result$spatial)))
+countries <- sort(c(country_ref, as.character(unique(result$spatial))))
 
 num_pages <- length(countries) %/% 20
 
