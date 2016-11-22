@@ -7,6 +7,9 @@ rm(list = ls())
 # set warning level
 options(warn = -1)
 
+# disable scientific notation
+options(scipen = 999)
+
 # create output directories
 if(!dir.exists("plots")) dir.create("plots", showWarnings = FALSE)
 if(!dir.exists("cache")) dir.create("cache", showWarnings = FALSE)
