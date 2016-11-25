@@ -138,13 +138,13 @@ df_scen <- mutate(df_scen, pop_dens = pop/area)
 df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
                                                    unique(df_hist$spatial))))
 
-model_agr <- lm(va_agr_pc_gr ~ gdp_pc + recession, data = df_hist)
-model_ind <- lm(va_ind_pc_gr ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
+model_agr <- lm(va_agr_pc ~ gdp_pc + recession, data = df_hist)
+model_ind <- lm(va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
 
 # prediction ----
 # agriculture
-df_scen$va_agr_pc_gr <- predict(model_agr, newdata = df_scen)
+df_scen$va_agr_pc <- predict(model_agr, newdata = df_scen)
 
 # industry
 # due to the fixed effect prediction can only be done for countries for which
@@ -153,67 +153,10 @@ countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
 
 # check if there are fixed effects present and predict accordingly
 if(length(countries_ind) > 1){
-  df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc_gr"] <-
+  df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc"] <-
   predict(model_ind, newdata = filter(df_scen, spatial %in% countries_ind))
 } else {
-  df_scen$va_ind_pc_gr = predict(model_ind, newdata = df_scen)
-}
-
-# filter out NA growth rates
-df_scen <- filter(df_scen, !is.na(va_ind_pc_gr))
-
-# replace negative growth rates with zeros
-# df_scen[df_scen$va_agr_pc_gr < 0, "va_agr_pc_gr"] <- 0
-# df_scen[df_scen$va_ind_pc_gr < 0, "va_ind_pc_gr"] <- 0
-
-# calculate service sector growth rate
-df_scen <- mutate(df_scen,
-                    va_ser_pc_gr = gdp_pc_gr - va_agr_pc_gr - va_ind_pc_gr)
-
-
-# use 2010 historical value as start
-df_hist_start <- filter(df_hist, temporal == 2010)
-
-# just to be sure, limit scenario data to years after that
-df_scen <- filter(df_scen, temporal > 2010)
-
-for(scen in paste0("SSP", 1:5)){
-  tmp <- mutate(df_hist_start, scenario = scen)
-  df_scen <- rbind(df_scen, tmp)
-}
-
-rm(tmp)
-
-df_scen <- arrange(df_scen, scenario, spatial, temporal)
-
-# compute sectoral value added per capita
-for(scen in unique(df_scen$scenario)){
-  for (country in unique(df_scen$spatial)){
-    # compute growth factor (*_grf) relative to base year
-    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-              df_scen$scenario == scen, "va_agr_pc_grf"] <-
-      cumprod(df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-                        df_scen$scenario == scen, "va_agr_pc_gr"] + 1)
-    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-              df_scen$scenario == scen, "va_ind_pc_grf"] <-
-      cumprod(df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-                        df_scen$scenario == scen, "va_ind_pc_gr"] + 1)
-
-    # apply growth factor to base year value
-    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-              df_scen$scenario == scen, "va_agr_pc"] <-
-      df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-                df_scen$scenario == scen, "va_agr_pc_grf"] *
-      as.numeric(df_scen[df_scen$spatial == country & df_scen$temporal == 2010 &
-                           df_scen$scenario == scen, "va_agr_pc"])
-
-    df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-              df_scen$scenario == scen, "va_ind_pc"] <-
-      df_scen[df_scen$spatial == country & df_scen$temporal > 2010 &
-                df_scen$scenario == scen, "va_ind_pc_grf"] *
-      as.numeric(df_scen[df_scen$spatial == country & df_scen$temporal == 2010 &
-                           df_scen$scenario == scen, "va_ind_pc"])
-  }
+  df_scen$va_ind_pc = predict(model_ind, newdata = df_scen)
 }
 
 # compute service sector as residual and level values
@@ -221,11 +164,15 @@ df_scen <- mutate(df_scen, va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
                            va_agr = va_agr_pc * pop,
                            va_ind = va_ind_pc * pop,
                            va_ser = va_ser_pc * pop)
+#
+#
+# result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
+#   rbind(df_hist) %>%
+#   arrange(spatial)
 
+result <- rbind(df_hist, df_scen)
 
-result <- select(df_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
-  rbind(df_hist) %>%
-  arrange(spatial)
+result <- arrange(result, spatial)
 
 # regional aggregation ----
 map_region <- read.csv("sources/regions_definition.csv") %>%
