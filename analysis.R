@@ -143,13 +143,18 @@ model_ind <- lm(va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
 
 # prediction ----
-# agriculture
-df_scen$va_agr_pc <- predict(model_agr, newdata = df_scen)
-
-# industry
 # due to the fixed effect prediction can only be done for countries for which
 # estimation has been carried out
 countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
+countries_agr <- c(country_ref, as.character(unique(model_agr$model$spatial)))
+
+# check if there are fixed effects present and predict accordingly
+if(length(countries_agr) > 1){
+  df_scen[df_scen$spatial %in% countries_agr, "va_agr_pc"] <-
+  predict(model_agr, newdata = filter(df_scen, spatial %in% countries_agr))
+} else {
+  df_scen$va_agr_pc = predict(model_agr, newdata = df_scen)
+}
 
 # check if there are fixed effects present and predict accordingly
 if(length(countries_ind) > 1){
