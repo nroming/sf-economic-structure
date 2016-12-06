@@ -7,6 +7,9 @@ rm(list = ls())
 # set warning level
 options(warn = -1)
 
+# turn plotting on or off
+plotting <- FALSE
+
 # disable scientific notation
 options(scipen = 999)
 
@@ -138,7 +141,7 @@ df_scen <- mutate(df_scen, pop_dens = pop/area)
 df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
                                                    unique(df_hist$spatial))))
 
-model_agr <- lm(va_agr_pc ~ gdp_pc + recession, data = df_hist)
+model_agr <- lm(va_agr_pc ~ gdp_pc + spatial + recession + pop_dens, data = df_hist)
 model_ind <- lm(va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
 
@@ -200,4 +203,4 @@ result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
                      share_ser = va_ser/sum_va)
 
 # plotting ----
-source("plotting.R")
+if(plotting) source("plotting.R")
