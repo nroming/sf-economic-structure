@@ -1,0 +1,180 @@
+SSPs and economic structure
+========================================================
+author: Niklas Roming, Marian Leimbach
+date: 28 November 2016
+width: 1920
+height: 1080
+
+```{r setup, include = FALSE}
+opts_chunk$set(cache=TRUE)
+source("analysis.R")
+```
+
+Status quo
+========================================================
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+hist <- select(result, scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser) %>%
+  filter(spatial %in% g20, scenario == "history")
+
+hist <- melt(hist, id.vars = c("scenario", "spatial", "temporal"))
+
+scen <- select(result, scenario, spatial, temporal, gdp) %>%
+  filter(spatial %in% g20, scenario != "history", temporal <= 2050)
+
+scen <- melt(scen, id.vars = c("scenario", "spatial", "temporal"))
+
+ggplot() +
+  geom_line(data = filter(hist, variable == "gdp"),
+            aes(x = temporal, y = value, group = variable), colour = "black") +
+  geom_area(data = filter(hist, variable != "gdp"),
+            aes(x = temporal, y = value, group = variable, fill = variable)) +
+  geom_line(data = scen, aes(x = temporal, y = value, group = scenario, colour = scenario)) +
+  ylab("bn USD2005") +
+  xlab("") +
+  scale_fill_brewer(type = "qual", palette = 2) +
+  theme_bw(base_size = 8) +
+  facet_wrap(~ spatial, scales = "free")
+
+```
+
+An observation I
+========================================================
+
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+df_plot <- filter(df, spatial %in% g20) %>% select(spatial, temporal,
+                                                   va_agr_pc, va_ind_pc,
+                                                   va_ser_pc, gdp_pc)
+
+df_plot <- df_plot[complete.cases(df_plot), ]
+
+df_plot <- melt(df_plot, id.vars = c("spatial", "temporal", "gdp_pc"))
+
+# order countries according to their 2013 GDP levels
+df_plot_recent <- filter(df_plot, temporal == 2013, variable == "va_ind_pc") %>%
+  arrange(desc(gdp_pc))
+
+df_plot$spatial <- ordered(df_plot$spatial, levels = df_plot_recent$spatial)
+
+ggplot() +
+  geom_point(data = df_plot, aes(x = gdp_pc, y = value, colour = variable)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita")
+```
+
+An observation II
+========================================================
+
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+ggplot() +
+  geom_point(data = df_plot, aes(x = gdp_pc, y = value, colour = variable)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap( ~ spatial, scales = "free", nrow = 3)
+```
+
+Econometric estimation and projection
+========================================================
+incremental: true
+
+-  $\text{Agriculture:} \quad VApC_{it}^{agr} = \beta_0 + \beta_1 GDPpC_{it} + \beta_2 popdens_{it} + \beta_3 recession_{it} + \beta_4 spatial_i + u_{it}$
+- $\text{Industry:} \quad VApC_{it}^{ind} = \beta_0 + \beta_1 GDPpC_{it} + \beta_2 GDPpC_{it}^2 + \beta_3 GDPpC_{it}^3 + \beta_4 popdens_{it} + \beta_5 recession_{it} + \beta_6 spatial_i + u_{it}$
+- Prediction using the SSP scenarios
+- Service sector is a residual: $VApC_{it}^{ser} = GDPpC_{it} - VApC_{it}^{agr} - VApC_{it}^{ind}$
+
+Results - G20
+========================================================
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+df_plot <- filter(result, spatial %in% g20, scenario %in% c("history", "SSP2")) %>% select(spatial, temporal, scenario,
+                                                   va_agr_pc, va_ind_pc,
+                                                   va_ser_pc, gdp_pc)
+
+df_plot <- df_plot[complete.cases(df_plot), ]
+
+df_plot <- melt(df_plot, id.vars = c("spatial", "temporal", "scenario", "gdp_pc"))
+
+# order countries according to their 2013 GDP levels
+df_plot_recent <- filter(df_plot, temporal == 2013, variable == "va_ind_pc") %>%
+  arrange(desc(gdp_pc))
+
+df_plot$spatial <- ordered(df_plot$spatial, levels = df_plot_recent$spatial)
+
+df_plot_5yr <- filter(df_plot, temporal %in% seq(1960, 2100, 5))
+
+ggplot() +
+  geom_point(data = df_plot_5yr, aes(x = gdp_pc, y = value, colour = variable, shape = scenario)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  # theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap(~ spatial, scales = "free")
+```
+
+Results - USA
+========================================================
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+df_plot_single <- filter(df_plot, spatial == "USA", temporal <= 2050)
+
+ggplot() +
+  geom_point(data = df_plot_single, aes(x = gdp_pc, y = value, shape = scenario)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  # theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap(~ variable, scales = "free")
+
+```
+
+Results - China
+========================================================
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+df_plot_single <- filter(df_plot, spatial == "CHN", temporal <= 2050)
+
+ggplot() +
+  geom_point(data = df_plot_single, aes(x = gdp_pc, y = value, shape = scenario)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  # theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap(~ variable, scales = "free")
+
+```
+
+Results - India
+========================================================
+```{r, echo = FALSE, fig.width=8, fig.height=4.5, dpi=300, out.width="1920px", height="1080px"}
+df_plot_single <- filter(df_plot, spatial == "IND", temporal <= 2050)
+
+ggplot() +
+  geom_point(data = df_plot_single, aes(x = gdp_pc, y = value, shape = scenario)) +
+  # geom_hline(yintercept = 10) +
+  theme_bw(base_size = 8) +
+  # theme(legend.position = "bottom") +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  ylab("Sectoral value added per capita") +
+  xlab("GDP per capita") +
+  facet_wrap(~ variable, scales = "free")
+
+```
+
+Next steps
+========================================================
+incremental: true
+
+- Close the gaps in the data: combine GGDC with WDI data
+- Proper model selection
+- Integrate further explanatory variables: Current account, resource exporting dummy
+- Different model structures: lagged variables (dependent and independent)
