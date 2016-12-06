@@ -253,6 +253,7 @@ ggplot() +
   geom_area(data = tmp, aes(x = temporal, y = value, fill = variable)) +
   ylab("Sectoral shares") +
   xlab("") +
+  geom_vline(xintercept = 2015) +
   theme_bw(base_size = 11) +
   theme(legend.position = "none") +
   scale_fill_brewer(type = "qual", palette = 6) +
