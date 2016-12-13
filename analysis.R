@@ -8,7 +8,7 @@ rm(list = ls())
 options(warn = -1)
 
 # turn plotting on or off
-plotting <- FALSE
+plotting <- TRUE
 
 # disable scientific notation
 options(scipen = 999)

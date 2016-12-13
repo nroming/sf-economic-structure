@@ -262,11 +262,12 @@ ggsave(filename = "plots/regions_sectoral_shares.png", width = 20, height = 28,
        units = "cm")
 
 # historical FE intensities by sector ----
-country <- "USA"
+countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "DEU")
 
 iea <- filter(idata, source_id == "IEA_2014",
-              spatial == country,
+              spatial %in% countries,
               temporal <= 2012,
+              temporal >= 1990,
               variable %in% paste("Final Energy",
                                    rep(c("Agriculture", "Industry", "Services"), 3),
                                    rep(c("Solids", "Liquids", "Gases", "Heat", "Electricity"), 3), sep = "|"))
@@ -283,7 +284,7 @@ iea$variable <- gsub("Electricity", "elec", iea$variable, fixed = TRUE)
 
 iea <- dcast(iea, scenario + spatial + temporal ~ variable)
 
-tmp <- filter(df_hist, spatial == country) %>%
+tmp <- filter(df_hist, spatial %in% countries) %>%
   select(scenario, spatial, temporal, va_ind, va_agr, va_ser)
 
 iea <- inner_join(iea, tmp)
@@ -323,17 +324,24 @@ iea$variable <- gsub("agr_", "", iea$variable, fixed = TRUE)
 iea$variable <- gsub("ind_", "", iea$variable, fixed = TRUE)
 iea$variable <- gsub("ser_", "", iea$variable, fixed = TRUE)
 
+iea$variable <- gsub("elec", "Electricity", iea$variable, fixed = TRUE)
+iea$variable <- gsub("gas", "Gases", iea$variable, fixed = TRUE)
+iea$variable <- gsub("heat", "Heat", iea$variable, fixed = TRUE)
+iea$variable <- gsub("liquid", "Liquids", iea$variable, fixed = TRUE)
+iea$variable <- gsub("solid", "Solids", iea$variable, fixed = TRUE)
+
 iea <- mutate(iea, value = value * 1e6)
 
 ggplot() +
   geom_line(data = iea, aes(x = temporal, y = value, group = variable,
                             colour = variable), size = 1) +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 9) +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  theme(legend.title=element_blank(), legend.position = "bottom") +
   xlab("") +
   ylab("GJ/bn USD2005") +
-  # scale_colour_manual(type = "qual", palette = 1) +
-  facet_wrap(~ sector)
-ggsave("plots/FEI_USA.png", width = 28, height = 18, units = "cm")
+  facet_grid(spatial ~ sector, scales = "free")
+ggsave(file.path("plots", "FEI.png"), width = 18, height = 27, units = "cm")
 
 # AR5 final energy demand pathways ----
 tmp <- filter(idata, source_id == "AR5",
