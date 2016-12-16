@@ -13,16 +13,20 @@ df_plot_recent <- filter(df_plot, temporal == 2013, variable == "va_ind_pc") %>%
 
 df_plot$spatial <- ordered(df_plot$spatial, levels = df_plot_recent$spatial)
 
+df_plot$variable <- gsub("va_agr_pc", "Agriculture", df_plot$variable, fixed = TRUE)
+df_plot$variable <- gsub("va_ind_pc", "Industry", df_plot$variable, fixed = TRUE)
+df_plot$variable <- gsub("va_ser_pc", "Services", df_plot$variable, fixed = TRUE)
+
 ggplot() +
   geom_point(data = df_plot, aes(x = gdp_pc, y = value, colour = variable)) +
   # geom_hline(yintercept = 10) +
-  theme_bw(base_size = 12) +
-  theme(legend.position = "bottom") +
+  theme_bw(base_size = 11) +
+  theme(legend.title=element_blank(), legend.position = "bottom") +
   scale_colour_brewer(type = "qual", palette = 2) +
-  ylab("Sectoral value added per capita") +
-  xlab("GDP per capita") +
-  facet_wrap( ~ spatial, scales = "free", nrow = 3)
-ggsave(filename = "plots/va_sec_pc_over_gdp_pc_by_country.png", height = 16, width = 28,
+  ylab("Sectoral value added per capita [k USD2005]") +
+  xlab("GDP per capita [k USD2005]") +
+  facet_wrap( ~ spatial, scales = "free")
+ggsave(filename = "plots/va_sec_pc_over_gdp_pc_by_country.png", height = 17, width = 17,
        units = "cm")
 
 ggplot() +
@@ -262,15 +266,18 @@ ggsave(filename = "plots/regions_sectoral_shares.png", width = 20, height = 28,
        units = "cm")
 
 # historical FE intensities by sector ----
-countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "DEU")
+countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "CHN")
 
 iea <- filter(idata, source_id == "IEA_2014",
               spatial %in% countries,
-              temporal <= 2012,
+              # temporal <= 2012,
               temporal >= 1990,
               variable %in% paste("Final Energy",
                                    rep(c("Agriculture", "Industry", "Services"), 3),
                                    rep(c("Solids", "Liquids", "Gases", "Heat", "Electricity"), 3), sep = "|"))
+
+iea <- group_by(iea, source_id, model, scenario, spatial, temporal, variable, unit) %>%
+  summarise(value = sum(value, na.rm = TRUE))
 
 iea$variable <- gsub("Final Energy|", "", iea$variable, fixed = TRUE)
 iea$variable <- gsub("Agriculture|", "agr_", iea$variable, fixed = TRUE)
@@ -294,24 +301,30 @@ iea <- mutate(iea, fei_agr_elec = agr_elec/va_agr,
               fei_agr_liquid = agr_liquid/va_agr,
               fei_agr_gas = agr_gas/va_agr,
               fei_agr_heat = agr_heat/va_agr,
+              fei_agr_tot = (agr_elec + agr_solid + agr_liquid + agr_gas + agr_heat)/va_agr,
 
               fei_ind_elec = ind_elec/va_ind,
               fei_ind_solid = ind_solid/va_ind,
               fei_ind_liquid = ind_liquid/va_ind,
               fei_ind_gas = ind_gas/va_ind,
               fei_ind_heat = ind_heat/va_ind,
+              fei_ind_tot = (ind_elec + ind_solid + ind_liquid + ind_gas + ind_heat)/va_ind,
+
 
               fei_ser_elec = ser_elec/va_ser,
               fei_ser_solid = ser_solid/va_ser,
               fei_ser_liquid = ser_liquid/va_ser,
               fei_ser_gas = ser_gas/va_ser,
-              fei_ser_heat = ser_heat/va_ser)
+              fei_ser_heat = ser_heat/va_ser,
+              fei_ser_tot = (ser_elec + ser_solid + ser_liquid + ser_gas + ser_heat)/va_ser
+)
 
-iea <- select(iea, spatial, temporal, fei_agr_elec:fei_ser_heat)
+iea <- select(iea, spatial, temporal, fei_agr_elec:fei_ser_tot)
 
 iea <- melt(iea, id.vars = c("spatial", "temporal"))
 
 iea <- filter(iea, !is.na(value))
+iea <- filter(iea, value != 0)
 
 iea$variable <- gsub("fei_", "", iea$variable, fixed = TRUE)
 
@@ -329,12 +342,17 @@ iea$variable <- gsub("gas", "Gases", iea$variable, fixed = TRUE)
 iea$variable <- gsub("heat", "Heat", iea$variable, fixed = TRUE)
 iea$variable <- gsub("liquid", "Liquids", iea$variable, fixed = TRUE)
 iea$variable <- gsub("solid", "Solids", iea$variable, fixed = TRUE)
+iea$variable <- gsub("tot", "Total", iea$variable, fixed = TRUE)
 
 iea <- mutate(iea, value = value * 1e6)
+
+iea_tot <- filter(iea, variable == "Total")
+iea <- filter(iea, variable != "Total")
 
 ggplot() +
   geom_line(data = iea, aes(x = temporal, y = value, group = variable,
                             colour = variable), size = 1) +
+  geom_line(data = iea_tot, aes(x = temporal, y = value), size = 1, colour = "black") +
   theme_bw(base_size = 9) +
   scale_colour_brewer(type = "qual", palette = 2) +
   theme(legend.title=element_blank(), legend.position = "bottom") +
