@@ -144,14 +144,17 @@ df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
 model_agr <- lm(va_agr_pc ~ gdp_pc + spatial + recession + pop_dens, data = df_hist)
 model_ind <- lm(va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
+model_ser <- lm(va_ser_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
+                  recession + pop_dens, data = df_hist)
 
 # prediction ----
 # due to the fixed effect prediction can only be done for countries for which
 # estimation has been carried out
 countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
 countries_agr <- c(country_ref, as.character(unique(model_agr$model$spatial)))
+countries_ser <- c(country_ref, as.character(unique(model_ser$model$spatial)))
 
-# check if there are fixed effects present and predict accordingly
+# check if there are fixed effects present for agriculture and predict accordingly
 if(length(countries_agr) > 1){
   df_scen[df_scen$spatial %in% countries_agr, "va_agr_pc"] <-
   predict(model_agr, newdata = filter(df_scen, spatial %in% countries_agr))
@@ -159,7 +162,7 @@ if(length(countries_agr) > 1){
   df_scen$va_agr_pc = predict(model_agr, newdata = df_scen)
 }
 
-# check if there are fixed effects present and predict accordingly
+# check if there are fixed effects present for industry and predict accordingly
 if(length(countries_ind) > 1){
   df_scen[df_scen$spatial %in% countries_ind, "va_ind_pc"] <-
   predict(model_ind, newdata = filter(df_scen, spatial %in% countries_ind))
@@ -167,8 +170,16 @@ if(length(countries_ind) > 1){
   df_scen$va_ind_pc = predict(model_ind, newdata = df_scen)
 }
 
+# check if there are fixed effects present for services and predict accordingly
+if(length(countries_ser) > 1){
+  df_scen[df_scen$spatial %in% countries_ser, "va_ser_pc"] <-
+  predict(model_ser, newdata = filter(df_scen, spatial %in% countries_ser))
+} else {
+  df_scen$va_ser_pc = predict(model_ser, newdata = df_scen)
+}
+
 # compute service sector as residual and level values
-df_scen <- mutate(df_scen, va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
+df_scen <- mutate(df_scen, #va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
                            va_agr = va_agr_pc * pop,
                            va_ind = va_ind_pc * pop,
                            va_ser = va_ser_pc * pop)
