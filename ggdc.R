@@ -7,7 +7,7 @@ rm(list = ls())
 
 options(scipen = 999)
 
-ggdc <- read.dta(unzip("sources/10sd_jan15_2014.zip", "10SD_jan15.dta", exdir = "sources"))
+ggdc <- read.dta(unzip("sources/10sd_jan15_2014.zip", "10SD_jan15.dta", exdir = "cache"))
 
 # make the ggdc NRmisc compatible ----
 # drop columns
