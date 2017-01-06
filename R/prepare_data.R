@@ -14,7 +14,7 @@ vars <- c("gdp" = "GDP",
 g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
          "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
 
-if(!file.exists(("cache/df.rda"))){
+if(!file.exists(("output/df.rda"))){
   message("Reading and preparing data from scratch. This takes a few seconds.")
   wdi <- filter(idata, source_id == "WDI_2015", variable %in% vars,
                 unit %in% c("bn USD2005/yr", "million", "km2"))
@@ -79,9 +79,9 @@ if(!file.exists(("cache/df.rda"))){
   df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
   # write data to disk
-  saveRDS(df, "cache/df.rda")
+  saveRDS(df, "output/df.rda")
 } else {
-  message(c("Reading previously saved prepared data to save time. Delete 'cache'
+  message(c("Reading previously saved prepared data to save time. Delete 'output'
   directory to read and prepare data from scratch."))
-  df <- readRDS("cache/df.rda")
+  df <- readRDS("output/df.rda")
 }

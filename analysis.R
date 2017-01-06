@@ -19,7 +19,7 @@ source("settings.R")
 
 # create output directories
 if(!dir.exists("figs")) dir.create("figs", showWarnings = FALSE)
-if(!dir.exists("cache")) dir.create("cache", showWarnings = FALSE)
+if(!dir.exists("output")) dir.create("output", showWarnings = FALSE)
 
 # prepare data ----
 # moved to separate script

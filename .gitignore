@@ -5,7 +5,7 @@
 sf-economic-structure.Rproj
 .DS_Store
 figs/
-cache/
+output/
 /settings.R
 
 
