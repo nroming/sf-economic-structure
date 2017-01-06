@@ -218,6 +218,6 @@ result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
                      share_ser = va_ser/sum_va)
 
 # plotting ----
-if(plotting) source("plotting.R")
+if(plotting) source("scripts/plotting.R")
 
 if(show_time) print(Sys.time() - start_time)
