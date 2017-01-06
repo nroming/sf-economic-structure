@@ -26,7 +26,7 @@ ggplot() +
   ylab("Sectoral value added per capita [k USD2005]") +
   xlab("GDP per capita [k USD2005]") +
   facet_wrap( ~ spatial, scales = "free")
-ggsave(filename = "figs/va_sec_pc_over_gdp_pc_by_country.png", height = 17, width = 17,
+ggsave(filename = "output/figures/va_sec_pc_over_gdp_pc_by_country.png", height = 17, width = 17,
        units = "cm")
 
 ggplot() +
@@ -37,7 +37,7 @@ ggplot() +
   scale_colour_brewer(type = "qual", palette = 2) +
   ylab("Sectoral value added per capita") +
   xlab("GDP per capita")
-ggsave(filename = "figs/va_sec_pc_over_gdp_pc.png", height = 16, width = 28,
+ggsave(filename = "output/figures/va_sec_pc_over_gdp_pc.png", height = 16, width = 28,
        units = "cm")
 
 # plot growth rates over GDP per capita ---
@@ -63,7 +63,7 @@ ggplot() +
   # geom_point(data = df_plot, aes(x = gdp_pc, y = va_ser_pc_gr), colour = "red",
   #            alpha = plot_alpha) +
   # geom_smooth(data = df_plot, aes(x = gdp_pc, y = va_ser_pc_gr), method = lm, colour = "red")
-  ggsave(filename = "figs/va_sec_pc_gr_over_gdp_pc.png", width = 14, height = 14,
+  ggsave(filename = "output/figures/va_sec_pc_gr_over_gdp_pc.png", width = 14, height = 14,
          units = "cm")
 
 
@@ -86,7 +86,7 @@ num_pages <- length(countries) %/% 20
 
 start_country <- 1
 
-pdf("figs/country_results_total.pdf")
+pdf("output/figures/country_results_total.pdf")
 for(i in seq(num_pages)){
 
   tmp_plot_area <- filter(tmp_plot, variable != "gdp",
@@ -136,7 +136,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
-ggsave("figs/country_results_total_G20.png", width = 24, height = 12, units = "cm")
+ggsave("output/figures/country_results_total_G20.png", width = 24, height = 12, units = "cm")
 
 ## GDP and sectoral value added per capita for all countries ----
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
@@ -157,7 +157,7 @@ num_pages <- length(countries) %/% 20
 
 start_country <- 1
 
-pdf("figs/country_results_capita.pdf")
+pdf("output/figures/country_results_capita.pdf")
 for(i in seq(num_pages)){
 
   tmp_plot_area <- filter(tmp_plot, variable != "gdp_pc",
@@ -207,7 +207,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
-ggsave("figs/country_results_capita_G20.png", width = 24, height = 12, units = "cm")
+ggsave("output/figures/country_results_capita_G20.png", width = 24, height = 12, units = "cm")
 
 # absolute value added per sector for all regions ----
 tmp_plot_scen <- filter(result_reg, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
@@ -234,7 +234,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~ spatial, scales = "free")
-ggsave(filename = "figs/regions_results_total.pdf", width = 20, height = 28, units = "cm")
+ggsave(filename = "output/figures/regions_results_total.pdf", width = 20, height = 28, units = "cm")
 
 # regional shares
 tmp_scen <- filter(result_reg, temporal >= 2015, temporal <= 2100, scenario == "SSP2") %>%
@@ -264,7 +264,7 @@ ggplot() +
   theme(legend.position = "none") +
   scale_fill_brewer(type = "qual", palette = 6) +
   facet_wrap(~ spatial)
-ggsave(filename = "figs/regions_sectoral_shares.png", width = 20, height = 28,
+ggsave(filename = "output/figures/regions_sectoral_shares.png", width = 20, height = 28,
        units = "cm")
 
 # historical FE intensities by sector ----
@@ -361,7 +361,7 @@ ggplot() +
   xlab("") +
   ylab("GJ/bn USD2005") +
   facet_grid(spatial ~ sector, scales = "free")
-ggsave(file.path("figs", "FEI.png"), width = 18, height = 27, units = "cm")
+ggsave(file.path("output/figures", "FEI.png"), width = 18, height = 27, units = "cm")
 
 # AR5 final energy demand pathways ----
 tmp <- filter(idata, source_id == "AR5",
@@ -396,4 +396,4 @@ ggplot() +
   ggtitle("Global final energy demand in 2100 with and without climate policy") +
   facet_wrap(~ model) +
   scale_fill_brewer(type = "qual", palette = 6)
-ggsave("figs/AR5_FE.png", width = 28, height = 15, units = "cm")
+ggsave("output/figures/AR5_FE.png", width = 28, height = 15, units = "cm")

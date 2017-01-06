@@ -18,8 +18,9 @@ if(!file.exists("settings.R")){
 source("settings.R")
 
 # create output directories
-if(!dir.exists("figs")) dir.create("figs", showWarnings = FALSE)
-if(!dir.exists("output")) dir.create("output", showWarnings = FALSE)
+if(!dir.exists("output/figures")){
+  dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+}
 
 # prepare data ----
 # moved to separate script
