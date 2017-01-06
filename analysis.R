@@ -6,17 +6,16 @@ rm(list = ls())
 
 start_time <- Sys.time()
 
-# show hwo long it took the script to run?
-show_time <- TRUE
+# Settings -----
+# Do not change the file 'scripts/settings.R' unless you really want to change
+# the default settings and commit these changes. All short term changes to
+# settings should be done in 'settings_actual.R'
+if(!file.exists("settings.R")){
+  message("No 'settings'-file found. Copying the default one from 'scripts/settings.R' to project root directory. This file is not under version control!")
+  file.copy(from = "scripts/settings.R", to = "settings.R")
+}
 
-# set warning level
-options(warn = -1)
-
-# turn plotting on or off
-plotting <- FALSE
-
-# disable scientific notation
-options(scipen = 999)
+source("settings.R")
 
 # create output directories
 if(!dir.exists("plots")) dir.create("plots", showWarnings = FALSE)
