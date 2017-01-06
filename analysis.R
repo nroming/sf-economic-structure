@@ -7,12 +7,12 @@ rm(list = ls())
 start_time <- Sys.time()
 
 # Settings -----
-# Do not change the file 'scripts/settings.R' unless you really want to change
+# Do not change the file 'R/settings.R' unless you really want to change
 # the default settings and commit these changes. All short term changes to
 # settings should be done in 'settings_actual.R'
 if(!file.exists("settings.R")){
-  message("No 'settings'-file found. Copying the default one from 'scripts/settings.R' to project root directory. This file is not under version control!")
-  file.copy(from = "scripts/settings.R", to = "settings.R")
+  message("No 'settings'-file found. Copying the default one from 'R/settings.R' to project root directory. This file is not under version control!")
+  file.copy(from = "R/settings.R", to = "settings.R")
 }
 
 source("settings.R")
@@ -218,6 +218,6 @@ result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
                      share_ser = va_ser/sum_va)
 
 # plotting ----
-if(plotting) source("scripts/plotting.R")
+if(plotting) source("R/plotting.R")
 
 if(show_time) print(Sys.time() - start_time)
