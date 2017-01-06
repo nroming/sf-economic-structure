@@ -9,3 +9,7 @@ plotting <- TRUE
 
 # disable scientific notation
 options(scipen = 999)
+
+# reference country - used especially as the reference for fixed effects
+# estimation
+country_ref = "USA"
