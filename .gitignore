@@ -6,5 +6,6 @@ sf-economic-structure.Rproj
 .DS_Store
 plots/
 cache/
-settings.R
+/settings.R
+
 
