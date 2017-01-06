@@ -68,7 +68,7 @@ ggplot() +
 
 
 # absolute value added per sector for all countries ----
-tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2050) %>%
+tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015) %>%
@@ -110,7 +110,7 @@ dev.off()
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
-                        temporal <= 2050, spatial %in% g20) %>%
+                        temporal <= 2100, spatial %in% g20) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015,
@@ -132,13 +132,14 @@ ggplot() +
   scale_fill_brewer(type = "qual", palette = 2) +
   ylab("bn USD2005/yr") +
   xlab("") +
+  ggtitle("Total sectoral value added") +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
 ggsave("plots/country_results_total_G20.png", width = 24, height = 12, units = "cm")
 
 ## GDP and sectoral value added per capita for all countries ----
-tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2050) %>%
+tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
   select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015) %>%
@@ -180,7 +181,7 @@ dev.off()
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
-                        temporal <= 2050, spatial %in% g20) %>%
+                        temporal <= 2100, spatial %in% g20) %>%
   select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015,
@@ -202,13 +203,14 @@ ggplot() +
   scale_fill_brewer(type = "qual", palette = 2) +
   ylab("k USD2005/yr") +
   xlab("") +
+  ggtitle("Per capita value added") +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
 ggsave("plots/country_results_capita_G20.png", width = 24, height = 12, units = "cm")
 
 # absolute value added per sector for all regions ----
-tmp_plot_scen <- filter(result_reg, scenario == "SSP2", temporal >= 2015, temporal <= 2050) %>%
+tmp_plot_scen <- filter(result_reg, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
 
 tmp_plot_hist <- filter(result_reg, scenario == "history", temporal < 2015) %>%
@@ -235,7 +237,7 @@ ggplot() +
 ggsave(filename = "plots/regions_results_total.pdf", width = 20, height = 28, units = "cm")
 
 # regional shares
-tmp_scen <- filter(result_reg, temporal >= 2015, temporal <= 2050, scenario == "SSP2") %>%
+tmp_scen <- filter(result_reg, temporal >= 2015, temporal <= 2100, scenario == "SSP2") %>%
     select(scenario, temporal, spatial, share_agr, share_ind,
           share_ser)
 
@@ -369,16 +371,16 @@ tmp <- filter(idata, source_id == "AR5",
                               "Final Energy|Heat",
                               "Final Energy|Liquids",
                               "Final Energy|Solids"),
-              temporal %in% c(2010, 2050),
+              temporal %in% c(2010, 2100),
               model != "AIM-Enduse[Backcast] 1.0")
 
 tmp2010 <- filter(tmp, temporal == 2010)
-tmp2050 <- filter(tmp, temporal == 2050)
+tmp2100 <- filter(tmp, temporal == 2100)
 
 tmp2010 <- filter(tmp2010, scenario == "LIMITS-RefPol") %>%
   mutate(scenario = "2010")
 
-tmp <- rbind(tmp2010, tmp2050)
+tmp <- rbind(tmp2010, tmp2100)
 
 tmp <- change_scenario(tmp, "LIMITS-RefPol", "BAU")
 tmp <- change_scenario(tmp, "LIMITS-RefPol-450", "2°C")
@@ -391,7 +393,7 @@ ggplot() +
   theme_bw(base_size = 12) +
   ylab(unique(tmp$unit)) +
   xlab("") +
-  ggtitle("Global final energy demand in 2050 with and without climate policy") +
+  ggtitle("Global final energy demand in 2100 with and without climate policy") +
   facet_wrap(~ model) +
   scale_fill_brewer(type = "qual", palette = 6)
 ggsave("plots/AR5_FE.png", width = 28, height = 15, units = "cm")
