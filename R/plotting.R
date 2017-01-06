@@ -293,6 +293,8 @@ iea$variable <- gsub("Electricity", "elec", iea$variable, fixed = TRUE)
 
 iea <- dcast(iea, scenario + spatial + temporal ~ variable)
 
+df_hist <- filter(df, scenario == "history")
+
 tmp <- filter(df_hist, spatial %in% countries) %>%
   select(scenario, spatial, temporal, va_ind, va_agr, va_ser)
 
