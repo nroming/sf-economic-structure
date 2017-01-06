@@ -144,7 +144,7 @@ df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
 model_agr <- lm(va_agr_pc ~ gdp_pc + spatial + recession + pop_dens, data = df_hist)
 model_ind <- lm(va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
                   recession + pop_dens, data = df_hist)
-model_ser <- lm(va_ser_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial +
+model_ser <- lm(va_ser_pc ~ gdp_pc + I(gdp_pc^2) + spatial +
                   recession + pop_dens, data = df_hist)
 
 # prediction ----
