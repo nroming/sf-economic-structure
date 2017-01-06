@@ -21,7 +21,7 @@ ggdc <- rename(ggdc, spatial = Country,
 
 # determine covered sectors
 sectors_10 <- names(ggdc)[4:13]
-sectors_3 <- c()
+sectors_3 <- c("AGR", "IND", "SER")
 
 # check if numbers add up to the given sum columm
 check_sum = FALSE
@@ -59,10 +59,50 @@ ggdc[ggdc$variable %in% c(paste0("VA_Q91_", sectors_10), "VA_Q91_SUM"), "unit"] 
 ggdc[grepl("EMP", ggdc$variable) & !grepl("SHARE", ggdc$variable), "unit"] <- "thousand"
 ggdc[grepl("SHARE", ggdc$variable, fixed = TRUE), "unit"] <- "1"
 
+# aggregate GGDC data to the three sector level ----
+# store units
+ggdc_units <- select(ggdc, variable, unit) %>% distinct()
+
+ggdc <- dcast(ggdc, source_id + model + scenario + spatial + temporal ~ variable)
+ggdc <- mutate(ggdc, VA_IND = VA_MIN + VA_MAN + VA_PU + VA_CON,
+                VA_SER = VA_WRT + VA_TRA + VA_FIRE + VA_GOV + VA_OTH,
+                VA_Q10_IND = VA_Q10_MIN + VA_Q10_MAN + VA_Q10_PU + VA_Q10_CON,
+                VA_Q10_SER = VA_Q10_WRT + VA_Q10_TRA + VA_Q10_FIRE + VA_Q10_GOV
+                + VA_Q10_OTH,
+                VA_Q05_IND = VA_Q05_MIN + VA_Q05_MAN + VA_Q05_PU + VA_Q05_CON,
+                VA_Q05_SER = VA_Q05_WRT + VA_Q05_TRA + VA_Q05_FIRE + VA_Q05_GOV
+                + VA_Q05_OTH,
+                VA_Q91_IND = VA_Q91_MIN + VA_Q91_MAN + VA_Q91_PU + VA_Q91_CON,
+                VA_Q91_SER = VA_Q91_WRT + VA_Q91_TRA + VA_Q91_FIRE + VA_Q91_GOV
+                + VA_Q91_OTH)
+
+ggdc <- melt(ggdc, id.vars = c("source_id", "model", "scenario", "spatial",
+                                 "temporal"))
+
+ggdc <- left_join(ggdc, ggdc_units, by = "variable")
+
+# assign the respective units to the GGDC data
+ggdc[ggdc$variable == "VA_IND", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_MIN", "unit"]
+ggdc[ggdc$variable == "VA_SER", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q10_IND", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q10_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q10_SER", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q10_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q05_IND", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q05_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q05_SER", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q05_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q91_IND", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q91_MIN", "unit"]
+ggdc[ggdc$variable == "VA_Q91_SER", "unit"] <-
+  ggdc_units[ggdc_units$variable == "VA_Q91_MIN", "unit"]
+
 # compare sector (shares) in different prices ----
 country <- "USA"
-tmp_va_curr <- filter(ggdc, variable %in% c(paste0("VA_", sectors_10)), spatial == country)
-tmp_va_2005 <- filter(ggdc, variable %in% c(paste0("VA_Q05_", sectors_10)), spatial == country)
+tmp_va_curr <- filter(ggdc, variable %in% c(paste0("VA_", sectors_3)), spatial == country)
+tmp_va_2005 <- filter(ggdc, variable %in% c(paste0("VA_Q05_", sectors_3)), spatial == country)
 
 tmp_va_2005$variable <- gsub("Q05_", "", tmp_va_2005$variable, fixed = TRUE)
 
@@ -77,8 +117,8 @@ ggplot() +
   facet_wrap(~prices)
 ggsave(file.path("plots", paste0("comp_sector_levels_", unique(tmp$spatial), ".png")), width = 16, height = 12, units = "cm")
 
-tmp_va_curr <- filter(ggdc, variable %in% c(paste0("VA_", sectors_10, "_SHARE")), spatial == country)
-tmp_va_2005 <- filter(ggdc, variable %in% c(paste0("VA_Q05_", sectors_10, "_SHARE")), spatial == country)
+tmp_va_curr <- filter(ggdc, variable %in% c(paste0("VA_", sectors_3, "_SHARE")), spatial == country)
+tmp_va_2005 <- filter(ggdc, variable %in% c(paste0("VA_Q05_", sectors_3, "_SHARE")), spatial == country)
 
 tmp_va_2005$variable <- gsub("Q05_", "", tmp_va_2005$variable, fixed = TRUE)
 
