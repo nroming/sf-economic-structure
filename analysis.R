@@ -4,11 +4,16 @@ library(ggplot2)
 
 rm(list = ls())
 
+start_time <- Sys.time()
+
+# show hwo long it took the script to run?
+show_time <- TRUE
+
 # set warning level
 options(warn = -1)
 
 # turn plotting on or off
-plotting <- TRUE
+plotting <- FALSE
 
 # disable scientific notation
 options(scipen = 999)
@@ -215,3 +220,5 @@ result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
 
 # plotting ----
 if(plotting) source("plotting.R")
+
+if(show_time) print(Sys.time() - start_time)
