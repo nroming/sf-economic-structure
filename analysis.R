@@ -18,7 +18,7 @@ if(!file.exists("settings.R")){
 source("settings.R")
 
 # create output directories
-if(!dir.exists("plots")) dir.create("plots", showWarnings = FALSE)
+if(!dir.exists("figs")) dir.create("figs", showWarnings = FALSE)
 if(!dir.exists("cache")) dir.create("cache", showWarnings = FALSE)
 
 # prepare data ----
@@ -198,7 +198,7 @@ result <- rbind(df_hist, df_scen)
 result <- arrange(result, spatial)
 
 # regional aggregation ----
-map_region <- read.csv("sources/regions_definition.csv") %>%
+map_region <- read.csv("data/regions_definition.csv") %>%
   select(ISO, reg11) %>%
   filter(!(reg11 %in% c("INTship", "INTair", "glob"))) %>%
   rename(spatial = ISO)

@@ -4,7 +4,7 @@
 .Ruserdata
 sf-economic-structure.Rproj
 .DS_Store
-plots/
+figs/
 cache/
 /settings.R
 

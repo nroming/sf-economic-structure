@@ -7,7 +7,7 @@ rm(list = ls())
 
 options(scipen = 999)
 
-ggdc <- read.dta(unzip("sources/10sd_jan15_2014.zip", "10SD_jan15.dta", exdir = "cache"))
+ggdc <- read.dta(unzip("data/10sd_jan15_2014.zip", "10SD_jan15.dta", exdir = "cache"))
 
 # make the ggdc NRmisc compatible ----
 # drop columns
@@ -115,7 +115,7 @@ ggplot() +
   geom_area(data = tmp, aes(x = temporal, y = value, group = variable, fill = variable)) +
   theme_bw() +
   facet_wrap(~prices)
-ggsave(file.path("plots", paste0("comp_sector_levels_", unique(tmp$spatial), ".png")), width = 16, height = 12, units = "cm")
+ggsave(file.path("figs", paste0("comp_sector_levels_", unique(tmp$spatial), ".png")), width = 16, height = 12, units = "cm")
 
 tmp_va_curr <- filter(ggdc, variable %in% c(paste0("VA_", sectors_3, "_SHARE")), spatial == country)
 tmp_va_2005 <- filter(ggdc, variable %in% c(paste0("VA_Q05_", sectors_3, "_SHARE")), spatial == country)
@@ -131,4 +131,4 @@ ggplot() +
   geom_area(data = tmp, aes(x = temporal, y = value, group = variable, fill = variable)) +
   theme_bw() +
   facet_wrap(~prices)
-ggsave(file.path("plots", paste0("comp_sector_shares_", unique(tmp$spatial), ".png")), width = 16, height = 12, units = "cm")
+ggsave(file.path("figs", paste0("comp_sector_shares_", unique(tmp$spatial), ".png")), width = 16, height = 12, units = "cm")
