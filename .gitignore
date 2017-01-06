@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+sf-economic-structure.Rproj
+.DS_Store
+plots/
+cache/
+settings.R
+
