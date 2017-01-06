@@ -84,3 +84,85 @@ prestimation <- function(x = df, spatial_ref = "USA",
 
   return(result)
 }
+
+plot_country_results <- function(x, level, scen_hist = "history",
+                                 scen_fut = "SSP2",
+                                 t_present = 2015,
+                                 t_max = 2100){
+
+  # select appropriate columns
+  switch(level,
+         "total" = {
+           # keep only columns of interest
+           x <- select(x, scenario, spatial, temporal, gdp, va_agr, va_ind,
+                       va_ser)
+
+           # differentiate between historical and scenario data
+           x_hist = filter(x, scenario == scen_hist,
+                           temporal < t_present)
+
+           x_scen = filter(x, scenario == scen_fut,
+                           temporal >= t_present, temporal <= t_max)
+         },
+         "capita" = {
+           # keep only columns of interest
+           x <- select(x, scenario, spatial, temporal, gdp_pc, va_agr_pc,
+                       va_ind_pc, va_ser_pc)
+
+           # differentiate between historical and scenario data
+           x_hist = filter(x, scenario == scen_hist,
+                           temporal < t_present)
+
+           x_scen = filter(x, scenario == scen_fut,
+                           temporal >= t_present, temporal <= t_max)
+         })
+
+  # join data together again
+  x <- rbind(x_hist, x_scen)
+
+  x <- melt(x, id.vars = c("scenario", "spatial", "temporal"))
+
+  countries <- sort(as.character(unique(x$spatial)))
+
+  num_pages <- length(countries) %/% 20
+
+  start_country <- 1
+
+  pdf_path <- file.path("output/figures", paste0("country_results_", level,
+                                                 ".pdf"))
+
+  pdf(pdf_path)
+  for(i in seq(num_pages)){
+
+    switch(level,
+           "total" = {
+             x_area <- filter(x, variable != "gdp",
+                              spatial %in% countries[start_country:(start_country + 19)])
+             x_line <- filter(x, variable == "gdp",
+                              spatial %in% countries[start_country:(start_country + 19)])
+           },
+           "capita" = {
+             x_area <- filter(x, variable != "gdp_pc",
+                              spatial %in% countries[start_country:(start_country + 19)])
+             x_line <- filter(x, variable == "gdp_pc",
+                              spatial %in% countries[start_country:(start_country + 19)])
+           })
+
+
+    start_country <- start_country + 20
+
+    p <- ggplot()
+    p <- p + geom_area(data = x_area, aes(x = temporal, y = value, fill=variable))
+    p <- p + geom_line(data = x_line, aes(x = temporal, y = value))
+    p <- p + ylab("")
+    p <- p + xlab("")
+    p <- p + theme_bw(base_size = 9)
+    p <- p + theme(legend.position = "none")
+    p <- p + facet_wrap(~ spatial, scales = "free")
+    print(p)
+  }
+  dev.off()
+}
+
+
+

@@ -68,45 +68,7 @@ ggplot() +
 
 
 # absolute value added per sector for all countries ----
-tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
-  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
-
-tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015) %>%
-  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
-
-tmp_plot <- rbind(tmp_plot_hist, tmp_plot_scen)
-
-rm(tmp_plot_scen, tmpe_plot_hist)
-
-tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
-
-countries <- sort(c(country_ref, as.character(unique(result$spatial))))
-
-num_pages <- length(countries) %/% 20
-
-start_country <- 1
-
-pdf("output/figures/country_results_total.pdf")
-for(i in seq(num_pages)){
-
-  tmp_plot_area <- filter(tmp_plot, variable != "gdp",
-                          spatial %in% countries[start_country:(start_country + 19)])
-  tmp_plot_line <- filter(tmp_plot, variable == "gdp",
-                          spatial %in% countries[start_country:(start_country + 19)])
-
-  start_country <- start_country + 20
-
-  p <- ggplot()
-  p <- p + geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable))
-  p <- p + geom_line(data = tmp_plot_line, aes(x = temporal, y = value))
-  p <- p + ylab("bn USD2005/yr")
-  p <- p + xlab("")
-  p <- p + theme_bw(base_size = 9)
-  p <- p + theme(legend.position = "none")
-  p <- p + facet_wrap(~spatial, scales = "free")
-  print(p)
-}
-dev.off()
+plot_country_results(result, level = "total")
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
@@ -139,45 +101,7 @@ ggplot() +
 ggsave("output/figures/country_results_total_G20.png", width = 24, height = 12, units = "cm")
 
 ## GDP and sectoral value added per capita for all countries ----
-tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015, temporal <= 2100) %>%
-  select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
-
-tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015) %>%
-  select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
-
-tmp_plot <- rbind(tmp_plot_hist, tmp_plot_scen)
-
-rm(tmp_plot_scen, tmpe_plot_hist)
-
-tmp_plot <- melt(tmp_plot, id.vars = c("scenario", "spatial", "temporal"))
-
-countries <- sort(as.character(unique(result$spatial)))
-
-num_pages <- length(countries) %/% 20
-
-start_country <- 1
-
-pdf("output/figures/country_results_capita.pdf")
-for(i in seq(num_pages)){
-
-  tmp_plot_area <- filter(tmp_plot, variable != "gdp_pc",
-                          spatial %in% countries[start_country:(start_country + 19)])
-  tmp_plot_line <- filter(tmp_plot, variable == "gdp_pc",
-                          spatial %in% countries[start_country:(start_country + 19)])
-
-  start_country <- start_country + 20
-
-  p <- ggplot()
-  p <- p + geom_area(data = tmp_plot_area, aes(x = temporal, y = value, fill=variable))
-  p <- p + geom_line(data = tmp_plot_line, aes(x = temporal, y = value))
-  p <- p + ylab("bn USD2005/yr")
-  p <- p + xlab("")
-  p <- p + theme_bw(base_size = 9)
-  p <- p + theme(legend.position = "none")
-  p <- p + facet_wrap(~spatial, scales = "free")
-  print(p)
-}
-dev.off()
+plot_country_results(result, level = "capita")
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
