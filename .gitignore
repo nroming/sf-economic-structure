@@ -7,5 +7,6 @@ sf-economic-structure.Rproj
 figs/
 output/
 /settings.R
+/scratchpad*.R
 
 
