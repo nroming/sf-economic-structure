@@ -78,10 +78,18 @@ if(!file.exists(("output/df.rda"))){
   df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
   df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
+  # regional mapping
+  map_region <- read.csv("data/regions_definition.csv") %>%
+  select(ISO, reg11) %>%
+  filter(!(reg11 %in% c("INTship", "INTair", "glob"))) %>%
+  rename(spatial = ISO)
+
   # write data to disk
   saveRDS(df, "output/df.rda")
+  saveRDS(map_region, "output/map_region.rda")
 } else {
   message(c("Reading previously saved prepared data to save time. Delete 'output'
   directory to read and prepare data from scratch."))
   df <- readRDS("output/df.rda")
+  map_region <- readRDS("output/map_region.rda")
 }

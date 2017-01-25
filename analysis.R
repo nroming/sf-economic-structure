@@ -38,11 +38,6 @@ result_list <- prestimation(x = df,
 result <- result_list$data
 
 # regional aggregation ----
-map_region <- read.csv("data/regions_definition.csv") %>%
-  select(ISO, reg11) %>%
-  filter(!(reg11 %in% c("INTship", "INTair", "glob"))) %>%
-  rename(spatial = ISO)
-
 result_reg <- inner_join(result, map_region, by = "spatial") %>%
   group_by(scenario, temporal, reg11) %>%
   summarise_each(funs(sum, "sum", sum(., na.rm = TRUE)), gdp, pop, va_ind, va_ser, va_agr) %>%
