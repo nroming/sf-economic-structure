@@ -75,6 +75,12 @@ prestimation <- function(x = df, spatial_ref = "USA",
 
   df <- rbind(x_hist, x_scen)
 
+  # compute GDP(pC) resulting from projections and deviation
+  df <- mutate(df, gdp_pc_pred = va_agr_pc + va_ind_pc + va_ser_pc,
+               gdp_pred = va_agr + va_ind + va_ser,
+               gdp_pc_dev = gdp_pc - gdp_pc_pred,
+               gdp_dev = gdp - gdp_pred)
+
   df <- arrange(df, spatial)
 
   # create list containing results
