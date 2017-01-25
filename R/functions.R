@@ -68,20 +68,16 @@ prestimation <- function(x = df, spatial_ref = "USA",
   }
 
   # compute service sector as residual and level values
-  x_scen <- mutate(x_scen, #va_ser_pc = gdp_pc - va_agr_pc - va_ind_pc,
+  x_scen <- mutate(x_scen,
                    va_agr = va_agr_pc * pop,
                    va_ind = va_ind_pc * pop,
                    va_ser = va_ser_pc * pop)
-  #
-  #
-  # result <- select(x_scen, -va_agr_pc_grf, -va_ind_pc_grf) %>%
-  #   rbind(x_hist) %>%
-  #   arrange(spatial)
 
   df <- rbind(x_hist, x_scen)
 
   df <- arrange(df, spatial)
 
+  # create list containing results
   result <- list("data" = df,
                  "model_agr" = model_agr,
                  "model_ind" = model_ind,
