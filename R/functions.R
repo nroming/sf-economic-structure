@@ -78,9 +78,14 @@ prestimation <- function(x = df, spatial_ref = "USA",
   #   rbind(x_hist) %>%
   #   arrange(spatial)
 
-  result <- rbind(x_hist, x_scen)
+  df <- rbind(x_hist, x_scen)
 
-  result <- arrange(result, spatial)
+  df <- arrange(df, spatial)
+
+  result <- list("data" = df,
+                 "model_agr" = model_agr,
+                 "model_ind" = model_ind,
+                 "model_ser" = model_ser)
 
   return(result)
 }

@@ -29,11 +29,13 @@ if(!dir.exists("output/figures")){
 source("R/prepare_data.R")
 
 # estimation ----
-result <- prestimation(x = df,
+result_list <- prestimation(x = df,
                         spatial_ref = country_ref,
                         formula_agr = va_agr_pc ~ gdp_pc + spatial + recession + pop_dens,
                      formula_ind = va_ind_pc ~ gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial + recession + pop_dens,
                      formula_ser = va_ser_pc ~ gdp_pc + I(gdp_pc^2) + spatial + recession + pop_dens)
+
+result <- result_list$data
 
 # regional aggregation ----
 map_region <- read.csv("data/regions_definition.csv") %>%
