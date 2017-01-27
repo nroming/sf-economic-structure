@@ -194,7 +194,7 @@ ggsave(filename = "output/figures/regions_sectoral_shares.png", width = 20, heig
 # historical FE intensities by sector ----
 countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "CHN")
 
-iea <- filter(idata, source_id == "IEA_2014",
+iea <- filter(idata_n, source_id == "IEA_2014",
               spatial %in% countries,
               # temporal <= 2012,
               temporal >= 1990,
@@ -290,7 +290,7 @@ ggplot() +
 ggsave(file.path("output/figures", "FEI.png"), width = 18, height = 27, units = "cm")
 
 # AR5 final energy demand pathways ----
-tmp <- filter(idata, source_id == "AR5",
+tmp <- filter(idata_n, source_id == "AR5",
               scenario %in% c("LIMITS-RefPol", "LIMITS-RefPol-450"),
               variable %in% c("Final Energy|Electricity",
                               "Final Energy|Gases",

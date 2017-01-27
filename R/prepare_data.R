@@ -1,6 +1,6 @@
 # vector of variables
 # ATTENTION: when adding variables here, you have to make sure that the
-# corresponding units are included in the filtering of 'idata' below
+# corresponding units are included in the filtering of 'idata_n' below
 vars <- c("gdp" = "GDP",
           "va_agr" = "Value Added|Agriculture",
           "va_ind" = "Value Added|Industry",
@@ -16,18 +16,21 @@ g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
          "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
 
 if(!file.exists(("output/df.rda"))){
+  # include data that was previously taken from the IDA package
+  source("R/IDA_independency_data.R")
+
   message("Reading and preparing data from scratch. This takes a few seconds.")
-  wdi <- filter(idata, source_id == "WDI_2015", variable %in% vars,
+  wdi <- filter(idata_n, source_id == "WDI_2015", variable %in% vars,
                 unit %in% c("bn USD2005/yr", "million", "km2", "1"))
 
-  ssp_gdp <- filter(idata, source_id == "SSP", model == "OECD Env-Growth",
+  ssp_gdp <- filter(idata_n, source_id == "SSP", model == "OECD Env-Growth",
                     variable == "GDP",
                     unit == "bn USD2005/yr",
                     temporal >= 2010)
 
   ssp_gdp <- interpolate_missing_years(ssp_gdp)
 
-  ssp_pop <- filter(idata, source_id == "SSP", model == "IIASA-WiC POP",
+  ssp_pop <- filter(idata_n, source_id == "SSP", model == "IIASA-WiC POP",
                     variable == "Population",
                     unit == "million",
                     temporal >= 2010)
