@@ -7,7 +7,8 @@ vars <- c("gdp" = "GDP",
           "va_man" = "Value Added|Manufacturing",
           "va_ser" = "Value Added|Services",
           "pop" = "Population",
-          "area" = "Area")
+          "area" = "Area",
+          "ca_share" = "Current account|GDP share")
 
 # G20 memberstates (ATTENTION: other EU members not yet present, also: no
 # sectoral data present for Canada)
@@ -17,7 +18,7 @@ g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
 if(!file.exists(("output/df.rda"))){
   message("Reading and preparing data from scratch. This takes a few seconds.")
   wdi <- filter(idata, source_id == "WDI_2015", variable %in% vars,
-                unit %in% c("bn USD2005/yr", "million", "km2"))
+                unit %in% c("bn USD2005/yr", "million", "km2", "1"))
 
   ssp_gdp <- filter(idata, source_id == "SSP", model == "OECD Env-Growth",
                     variable == "GDP",
@@ -70,7 +71,9 @@ if(!file.exists(("output/df.rda"))){
            va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) /
              lag(va_ser_pc, n = 1, order_by = temporal) - 1,
            gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) /
-             lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
+             lag(gdp_pc, n = 1, order_by = temporal) - 1,
+           ca_gr = lag(ca_share, n = 0, order_by = temporal) /
+             lag(ca_share, n = 1, order_by = temporal) - 1) %>%
     ungroup()
 
   # add recession dummy: 1 in case of a recession

@@ -29,7 +29,6 @@ if(!dir.exists("output/figures")){
 source("R/prepare_data.R")
 
 # estimation ----
-
 # define right hand side of regression formula
 rhs <- c("gdp_pc + spatial + recession",
          "gdp_pc + spatial + recession + pop_dens",
