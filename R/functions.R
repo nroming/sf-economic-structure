@@ -171,5 +171,5 @@ plot_country_results <- function(x, level, scen_hist = "history",
   dev.off()
 }
 
-
-
+# include functionality that was previously taken from the IDA package
+source("R/IDA_independency_functions.R")
