@@ -1,5 +1,11 @@
 prestimation <- function(x = df, spatial_ref = "USA",
-                         formula_agr, formula_ind, formula_ser){
+                         formula_agr, formula_ind, formula_ser,
+                         debug_function = FALSE){
+
+  if(debug_function){
+    browser()
+  }
+
   # relevel countries so that the US (or another country) are used as reference
   # for the fixed effects estimation below
   x = mutate(x, spatial = relevel(spatial, ref = spatial_ref))
@@ -95,7 +101,12 @@ prestimation <- function(x = df, spatial_ref = "USA",
 plot_country_results <- function(x, level, scen_hist = "history",
                                  scen_fut = "SSP2",
                                  t_present = 2015,
-                                 t_max = 2100){
+                                 t_max = 2100,
+                                 debug_function = FALSE){
+
+  if(debug_function){
+    browser()
+  }
 
   # select appropriate columns
   switch(level,
