@@ -16,12 +16,13 @@ g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
          "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
 
 if(!file.exists(("output/data/df.rda"))){
+  message("Reading and preparing data from scratch. This takes a few seconds.")
+
   # include data that was previously taken from the IDA package
   source("R/IDA_independency_data.R")
 
   saveRDS(idata_n, file = "output/data/idata.rda")
 
-  message("Reading and preparing data from scratch. This takes a few seconds.")
   wdi <- filter(idata_n, source_id == "WDI_2015", variable %in% vars,
                 unit %in% c("bn USD2005/yr", "million", "km2", "1"))
 
@@ -55,6 +56,11 @@ if(!file.exists(("output/data/df.rda"))){
 
   df <- dcast(df, scenario + spatial + temporal ~ variable)
 
+  # compute current account levels
+  # this is necessary since the current account levels in WDI are given in
+  # current US$
+  df <- mutate(df, ca = ca_share * gdp)
+
   # compute per capita values
   df <- mutate(df, gdp_pc = gdp / pop,
                va_agr_pc = va_agr / pop,
@@ -62,7 +68,8 @@ if(!file.exists(("output/data/df.rda"))){
                va_man_pc = va_man / pop,
                va_ser_pc = va_ser / pop,
                va_agrind_pc = va_agr_pc + va_ind_pc,
-               pop_dens = pop / area
+               pop_dens = pop / area,
+               ca_pc = ca / pop
   )
 
   # calculate growth rates
