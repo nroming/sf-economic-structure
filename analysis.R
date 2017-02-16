@@ -4,7 +4,7 @@ library(readr)
 library(readxl)
 library(countrycode)
 library(dplyr)
-
+library(openxlsx)
 
 rm(list = ls())
 
@@ -106,6 +106,9 @@ result_list <- prestimation(x = df,
                             formula_ser = best_ser)
 
 result <- result_list$data
+
+# write out result
+write.xlsx(result, file = "output/data/result.xlsx")
 
 # regional aggregation ----
 result_reg <- inner_join(result, map_region, by = "spatial") %>%
