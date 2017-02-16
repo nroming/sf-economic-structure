@@ -15,7 +15,7 @@ source("R/functions.R")
 # Settings -----
 # Do not change the file 'R/settings.R' unless you really want to change
 # the default settings and commit these changes. All short term changes to
-# settings should be done in 'settings_actual.R'
+# settings should be done in 'settings.R' in project root directory
 if(!file.exists("settings.R")){
   message("No 'settings'-file found. Copying the default one from 'R/settings.R' to project root directory. This file is not under version control!")
   file.copy(from = "R/settings.R", to = "settings.R")

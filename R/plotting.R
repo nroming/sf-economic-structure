@@ -323,3 +323,33 @@ ggplot() +
   facet_wrap(~ model) +
   scale_fill_brewer(type = "qual", palette = 6)
 ggsave("output/figures/AR5_FE.png", width = 28, height = 15, units = "cm")
+
+
+# historical GDP composition for G20 countries ----
+tmp <- filter(df, temporal %in% c(2005, 2010), spatial %in% g20,
+              spatial != "CAN", scenario == "history") %>%
+  select(temporal,spatial, gdp, va_agr, va_ind, va_ser, tax, ca, nx)
+
+tmp <- mutate(tmp, temporal = as.character(temporal))
+
+tmp_rest_sum <- mutate(tmp, va_sum = va_agr + va_ind + va_ser + nx + ca + tax) %>%
+  select(temporal, spatial, va_sum)
+
+tmp_rest_sum <- melt(tmp_rest_sum, id.vars = c("temporal", "spatial"))
+
+tmp <- melt(tmp, id.vars = c("temporal", "spatial"))
+
+tmp_gdp <- filter(tmp, variable == "gdp")
+tmp_rest <- filter(tmp, variable != "gdp")
+
+tmp_rest_pos <- filter(tmp_rest, value >= 0)
+tmp_rest_neg <- filter(tmp_rest, value < 0)
+
+ggplot() +
+  theme_bw(base_size = 9) +
+  geom_bar(data = tmp_rest_pos, aes(x = temporal, y = value, fill = variable), stat = "identity", position = "stack") +
+    geom_bar(data = tmp_rest_neg, aes(x = temporal, y = value, fill = variable), stat = "identity", position = "stack") +
+  geom_point(data = tmp_gdp, aes(x = temporal, y = value), shape = "o") +
+  geom_point(data = tmp_rest_sum, aes(x = temporal, y = value), shape = "+") +
+  facet_wrap(~ spatial, scales = "free")
+ggsave("output/figures/GDP_check.png", width = 24, height = 18, units = "cm")
