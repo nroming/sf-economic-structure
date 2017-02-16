@@ -13,3 +13,6 @@ options(scipen = 999)
 # reference country - used especially as the reference for fixed effects
 # estimation
 country_ref = "USA"
+
+# force a historical match between sum of value added and GDP
+force_sector_match_gdp = TRUE

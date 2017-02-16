@@ -36,6 +36,16 @@ if(!dir.exists("output/data")){
 # moved to separate script
 source("R/prepare_data.R")
 
+# adjust historical sectorial value added so that their sum matches the GDP
+if(force_sector_match_gdp){
+  df <- mutate(df, va_agr = va_agr/(va_agr + va_ind + va_ser) * gdp,
+             va_ind = va_ind/(va_agr + va_ind + va_ser) * gdp,
+             va_ser = va_ser/(va_agr + va_ind + va_ser) * gdp,
+             va_agr_pc = va_agr_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
+             va_ind_pc = va_ind_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
+             va_ser_pc = va_ser_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc)
+}
+
 # estimation ----
 # define right hand side of regression formula
 rhs <- c("gdp_pc + spatial + recession",
