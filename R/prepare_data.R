@@ -8,7 +8,10 @@ vars <- c("gdp" = "GDP",
           "va_ser" = "Value Added|Services",
           "pop" = "Population",
           "area" = "Area",
-          "ca_share" = "Current account|GDP share")
+          "ca_share" = "Current account|GDP share",
+          "ex" = "Exports|All",
+          "im" = "Imports|All",
+          "tax_share" = "Taxes|Share")
 
 # G20 memberstates (ATTENTION: other EU members not yet present, also: no
 # sectoral data present for Canada)
@@ -61,6 +64,12 @@ if(!file.exists(("output/data/df.rda"))){
   # current US$
   df <- mutate(df, ca = ca_share * gdp)
 
+  # compute net exports
+  df <- mutate(df, nx = ex - im)
+
+  # compute taxes (on value added from industry and services)
+  df <- mutate(df, tax = tax_share * (va_ind + va_ser))
+
   # compute per capita values
   df <- mutate(df, gdp_pc = gdp / pop,
                va_agr_pc = va_agr / pop,
@@ -69,7 +78,9 @@ if(!file.exists(("output/data/df.rda"))){
                va_ser_pc = va_ser / pop,
                va_agrind_pc = va_agr_pc + va_ind_pc,
                pop_dens = pop / area,
-               ca_pc = ca / pop
+               ca_pc = ca / pop,
+               nx_pc = nx / pop,
+               tax_pc = tax / pop
   )
 
   # calculate growth rates
