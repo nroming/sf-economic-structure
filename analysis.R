@@ -48,7 +48,12 @@ if(force_sector_match_gdp){
 
 # estimation ----
 # define right hand side of regression formula
-rhs <- c("gdp_pc + spatial + recession",
+rhs <- c("gdp_pc + recession",
+         "gdp_pc + recession + pop_dens",
+         "gdp_pc + recession + pop_dens + gdp",
+         "gdp_pc + recession + pop_dens + pop",
+         "gdp_pc + recession + pop_dens + gdp + pop",
+         "gdp_pc + spatial + recession",
          "gdp_pc + spatial + recession + pop_dens",
          "gdp_pc + spatial + recession + pop_dens + gdp",
          "gdp_pc + spatial + recession + pop_dens + pop",
