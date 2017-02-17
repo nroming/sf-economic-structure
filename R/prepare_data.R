@@ -89,14 +89,10 @@ if(!file.exists(("output/data/df.rda"))){
              lag(va_agr_pc, n = 1, order_by = temporal) - 1,
            va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) /
              lag(va_ind_pc, n = 1, order_by = temporal) - 1,
-           va_agrind_pc_gr = lag(va_agrind_pc, n = 0, order_by = temporal) /
-             lag(va_agrind_pc, n = 1, order_by = temporal) - 1,
            va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) /
              lag(va_ser_pc, n = 1, order_by = temporal) - 1,
            gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) /
-             lag(gdp_pc, n = 1, order_by = temporal) - 1,
-           ca_gr = lag(ca_share, n = 0, order_by = temporal) /
-             lag(ca_share, n = 1, order_by = temporal) - 1) %>%
+             lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
     ungroup()
 
   # add recession dummy: 1 in case of a recession
