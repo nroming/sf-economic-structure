@@ -1,4 +1,4 @@
-prestimation <- function(x = df, spatial_ref = "USA",
+prestimation <- function(x = df, ref_country = country_ref,
                          formula_agr, formula_ind, formula_ser,
                          debug_function = FALSE){
 
@@ -8,7 +8,7 @@ prestimation <- function(x = df, spatial_ref = "USA",
 
   # relevel countries so that the US (or another country) are used as reference
   # for the fixed effects estimation below
-  x = mutate(x, spatial = relevel(spatial, ref = spatial_ref))
+  x = mutate(x, spatial = relevel(spatial, ref = ref_country))
 
   # split up data into separate dataframes for historic and scenario data
   x_hist <- filter(x, scenario == "history")
@@ -45,9 +45,9 @@ prestimation <- function(x = df, spatial_ref = "USA",
 
   # due to the fixed effect prediction can only be done for countries for which
   # estimation has been carried out
-  countries_ind <- c(country_ref, as.character(unique(model_ind$model$spatial)))
-  countries_agr <- c(country_ref, as.character(unique(model_agr$model$spatial)))
-  countries_ser <- c(country_ref, as.character(unique(model_ser$model$spatial)))
+  countries_ind <- c(ref_country, as.character(unique(model_ind$model$spatial)))
+  countries_agr <- c(ref_country, as.character(unique(model_agr$model$spatial)))
+  countries_ser <- c(ref_country, as.character(unique(model_ser$model$spatial)))
 
   # check if there are fixed effects present for agriculture and predict accordingly
   if(length(countries_agr) > 1){
@@ -102,7 +102,8 @@ plot_country_results <- function(x, level, scen_hist = "history",
                                  scen_fut = "SSP2",
                                  t_present = 2015,
                                  t_max = 2100,
-                                 debug_function = FALSE){
+                                 debug_function = FALSE,
+                                 ref_country = country_ref){
 
   if(debug_function){
     browser()

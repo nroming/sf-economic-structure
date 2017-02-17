@@ -100,7 +100,6 @@ best_ser <- filter(rsq_ser, r_sq_adj == max(r_sq_adj)) %>% select(formula) %>%
 
 # estimation ---
 result_list <- prestimation(x = df,
-                            spatial_ref = country_ref,
                             formula_agr = best_agr,
                             formula_ind = best_ind,
                             formula_ser = best_ser)
