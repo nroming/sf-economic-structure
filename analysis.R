@@ -97,6 +97,9 @@ result_list <- prestimation(x = df,
 
 result <- result_list$data
 
+# post-processing ----
+source("R/post-processing.R")
+
 # regional aggregation ----
 result_reg <- inner_join(result, map_region, by = "spatial") %>%
   group_by(scenario, temporal, reg11) %>%
