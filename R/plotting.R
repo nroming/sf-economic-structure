@@ -72,7 +72,7 @@ plot_country_results(result, level = "total")
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
-                        temporal <= 2050, spatial %in% g20) %>%
+                        temporal <= 2100, spatial %in% g20) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015,
@@ -353,3 +353,37 @@ ggplot() +
   geom_point(data = tmp_rest_sum, aes(x = temporal, y = value), shape = "+") +
   facet_wrap(~ spatial, scales = "free")
 ggsave("output/figures/GDP_check.png", width = 24, height = 18, units = "cm")
+
+# compare country level sectoral structure over SSPs ----
+df_plot <- filter(result, spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
+  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+df_plot <- melt(df_plot, id.vars = c("scenario", "spatial", "temporal", "gdp"))
+
+# replacing history with the respective SSP
+tmp <- data.frame()
+for(scen in c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")){
+  tmp_loop <- filter(df_plot, scenario %in% c("history", scen)) %>%
+    mutate(scenario = gsub("history", scen, scenario))
+
+  tmp <- rbind(tmp, tmp_loop)
+}
+
+df_plot <- tmp
+rm(tmp)
+
+for(country in unique(df_plot$spatial)){
+  df_plot_tmp <- filter(df_plot, spatial == country)
+  ggplot() +
+    geom_line(data = df_plot_tmp, aes(x = temporal, y = gdp)) +
+    geom_area(data = df_plot_tmp, aes(x = temporal, y = value, fill = variable)) +
+    theme_bw(base_size = 12) +
+    xlab("") +
+    ggtile(country) +
+    facet_wrap(~ scenario)
+  ggsave(paste0("output/figures/SSP_compare_level_", country, ".png"),
+         width = 24, height = 18, units = "cm")
+}
+
+
+
