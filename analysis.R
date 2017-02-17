@@ -109,6 +109,10 @@ result <- result_list$data
 # write out result
 write.xlsx(result, file = "output/data/result.xlsx")
 
+# post-processing ----
+source("R/post-processing.R")
+
+
 # regional aggregation ----
 result_reg <- inner_join(result, map_region, by = "spatial") %>%
   group_by(scenario, temporal, reg11) %>%
