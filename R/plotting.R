@@ -355,8 +355,17 @@ ggplot() +
 ggsave("output/figures/GDP_check.png", width = 24, height = 18, units = "cm")
 
 # compare country level sectoral structure over SSPs ----
-df_plot <- filter(result, spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
+df_plot_hist <- filter(result, scenario == "history",
+                       spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
   select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+df_plot_scen <- filter(result, scenario != "history",
+                       temporal > max(df_plot_hist$temporal),
+                       spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
+  select(scenario, spatial, temporal, gdp, va_agr, va_ind, va_ser)
+
+df_plot <- rbind(df_plot_hist, df_plot_scen)
+rm(df_plot_hist, df_plot_scen)
 
 df_plot <- melt(df_plot, id.vars = c("scenario", "spatial", "temporal", "gdp"))
 
@@ -379,11 +388,10 @@ for(country in unique(df_plot$spatial)){
     geom_area(data = df_plot_tmp, aes(x = temporal, y = value, fill = variable)) +
     theme_bw(base_size = 12) +
     xlab("") +
-    ggtile(country) +
+    ggtitle(country) +
     facet_wrap(~ scenario)
   ggsave(paste0("output/figures/SSP_compare_level_", country, ".png"),
          width = 24, height = 18, units = "cm")
 }
-
 
 
