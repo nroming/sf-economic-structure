@@ -127,6 +127,7 @@ ggplot() +
   scale_fill_brewer(type = "qual", palette = 2) +
   ylab("k USD2005/yr") +
   xlab("") +
+  geom_vline(xintercept = 2015, size = 0.5) +
   ggtitle("Per capita value added") +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
