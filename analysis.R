@@ -48,21 +48,19 @@ if(force_sector_match_gdp){
 
 # estimation ----
 # define right hand side of regression formula
-rhs <- c("gdp_pc + recession",
-         "gdp_pc + recession + pop_dens",
-         "gdp_pc + recession + pop_dens + gdp",
-         "gdp_pc + recession + pop_dens + pop",
-         "gdp_pc + recession + pop_dens + gdp + pop",
-         "gdp_pc + spatial + recession",
-         "gdp_pc + spatial + recession + pop_dens",
-         "gdp_pc + spatial + recession + pop_dens + gdp",
-         "gdp_pc + spatial + recession + pop_dens + pop",
-         "gdp_pc + spatial + recession + pop_dens + gdp + pop",
-         "log(gdp_pc) + spatial + recession",
-         "log(gdp_pc) + spatial + recession + log(gdp)",
-         "log(gdp_pc) + spatial + recession + log(pop)",
-         "gdp_pc + I(gdp_pc^2) + spatial + recession + pop_dens",
-         "gdp_pc + I(gdp_pc^2) + I(gdp_pc^3) + spatial + recession + pop_dens")
+factors <- c("gdp_pc", "I(gdp_pc^2)", "I(gdp_pc^3)", "spatial", "recession", "pop_dens", "temporal")
+
+rhs <- list()
+
+for (m in 1:length(factors)){
+  tmp <-  combn(factors, m, simplify = FALSE)
+
+  tmp <- lapply(tmp, paste0, collapse = " + ")
+
+  rhs <- append(rhs, tmp)
+}
+
+rhs <- as.character(rhs)
 
 # determine formulas
 formula_agr <- paste("va_agr_pc", "~", rhs)
