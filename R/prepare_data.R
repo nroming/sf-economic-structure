@@ -109,10 +109,12 @@ if(!file.exists(("output/data/df.rda"))){
   # write data to disk
   saveRDS(df, "output/data/df.rda")
   saveRDS(map_region, "output/data/map_region.rda")
+  saveRDS(units, "output/data/units.rda")
 } else {
   message(c("Reading previously saved prepared data to save time. Delete 'output'
   directory to read and prepare data from scratch."))
   df <- readRDS("output/data/df.rda")
   map_region <- readRDS("output/data/map_region.rda")
   idata_n <- readRDS("output/data/idata.rda")
+  units <- readRDS("output/data/units.rda")
 }
