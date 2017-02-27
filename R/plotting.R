@@ -395,4 +395,43 @@ for(country in unique(df_plot$spatial)){
          width = 24, height = 18, units = "cm")
 }
 
+# compare per capita levels over SSPs ----
+df_plot_hist <- filter(result, scenario == "history",
+                       spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
+  select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
+
+df_plot_scen <- filter(result, scenario != "history",
+                       temporal > max(df_plot_hist$temporal),
+                       spatial %in% c("USA", "CHN", "IND", "NGA")) %>%
+  select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
+
+df_plot <- rbind(df_plot_hist, df_plot_scen)
+rm(df_plot_hist, df_plot_scen)
+
+df_plot <- melt(df_plot, id.vars = c("scenario", "spatial", "temporal", "gdp_pc"))
+
+# replacing history with the respective SSP
+tmp <- data.frame()
+for(scen in c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")){
+  tmp_loop <- filter(df_plot, scenario %in% c("history", scen)) %>%
+    mutate(scenario = gsub("history", scen, scenario))
+
+  tmp <- rbind(tmp, tmp_loop)
+}
+
+df_plot <- tmp
+rm(tmp)
+
+for(country in unique(df_plot$spatial)){
+  df_plot_tmp <- filter(df_plot, spatial == country)
+  ggplot() +
+    geom_line(data = df_plot_tmp, aes(x = temporal, y = gdp_pc)) +
+    geom_area(data = df_plot_tmp, aes(x = temporal, y = value, fill = variable)) +
+    theme_bw(base_size = 12) +
+    xlab("") +
+    ggtitle(country) +
+    facet_wrap(~ scenario)
+  ggsave(paste0("output/figures/SSP_compare_capita_", country, ".png"),
+         width = 24, height = 18, units = "cm")
+}
 
