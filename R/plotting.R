@@ -189,7 +189,7 @@ ggplot() +
   theme(legend.position = "none") +
   scale_fill_brewer(type = "qual", palette = 6) +
   facet_wrap(~ spatial)
-ggsave(filename = "output/figures/regions_sectoral_shares.png", width = 20, height = 28,
+ggsave(filename = "output/figures/regions_sectoral_shares.png", width = 32, height = 18,
        units = "cm")
 
 # historical FE intensities by sector ----
