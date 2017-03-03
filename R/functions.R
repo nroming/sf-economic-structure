@@ -49,6 +49,10 @@ prestimation <- function(x = df, ref_country = country_ref,
   countries_agr <- c(ref_country, as.character(unique(model_agr$model$spatial)))
   countries_ser <- c(ref_country, as.character(unique(model_ser$model$spatial)))
 
+  countries <- list("agr" = countries_agr,
+                    "ind" = countries_ind,
+                    "ser" = countries_agr)
+
   # check if there are fixed effects present for agriculture and predict accordingly
   if(length(countries_agr) > 1){
     x_scen[x_scen$spatial %in% countries_agr, "va_agr_pc"] <-
@@ -93,7 +97,8 @@ prestimation <- function(x = df, ref_country = country_ref,
   result <- list("data" = df,
                  "model_agr" = model_agr,
                  "model_ind" = model_ind,
-                 "model_ser" = model_ser)
+                 "model_ser" = model_ser,
+                 "countries" = countries)
 
   return(result)
 }
