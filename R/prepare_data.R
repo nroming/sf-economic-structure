@@ -100,6 +100,13 @@ if(!file.exists(("output/data/df.rda"))){
   df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
   df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
+  # compute ratio of country level GDP per capita to global GDP per capita as a
+  # measure of convergence
+  df <- group_by(df, scenario, temporal) %>%
+    mutate(gdp_pc_glob = sum(gdp, na.rm = TRUE)/sum(pop, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(ratio_gdp_pc2glob = gdp_pc/gdp_pc_glob)
+
   # regional mapping
   map_region <- read.csv("data/regions_definition.csv") %>%
   select(ISO, reg11) %>%

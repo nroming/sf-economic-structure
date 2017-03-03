@@ -48,7 +48,7 @@ if(force_sector_match_gdp){
 
 # estimation ----
 # define right hand side of regression formula
-factors <- c("gdp_pc", "I(gdp_pc^2)", "I(gdp_pc^3)", "spatial", "recession", "pop_dens", "temporal")
+factors <- c("gdp_pc", "I(gdp_pc^2)", "I(gdp_pc^3)", "spatial", "recession", "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 rhs <- list()
 
