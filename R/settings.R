@@ -18,3 +18,12 @@ country_ref = "USA"
 
 # force a match between sum of sectoral value added and GDP
 force_sector_match_gdp = TRUE
+
+# create output directories ----
+if(!dir.exists("output/figures")){
+  dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+}
+
+if(!dir.exists("output/data")){
+  dir.create("output/data", recursive = TRUE, showWarnings = FALSE)
+}
