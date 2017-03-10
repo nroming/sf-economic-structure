@@ -27,3 +27,18 @@ if(!dir.exists("output/figures")){
 if(!dir.exists("output/data")){
   dir.create("output/data", recursive = TRUE, showWarnings = FALSE)
 }
+
+# define right hand side of regression formula ----
+factors <- c("gdp_pc", "I(gdp_pc^2)", "I(gdp_pc^3)", "spatial", "recession", "pop_dens", "temporal", "ratio_gdp_pc2glob")
+
+rhs <- list()
+
+for (m in 1:length(factors)){
+  tmp <-  combn(factors, m, simplify = FALSE)
+
+  tmp <- lapply(tmp, paste0, collapse = " + ")
+
+  rhs <- append(rhs, tmp)
+}
+
+rhs <- as.character(rhs)
