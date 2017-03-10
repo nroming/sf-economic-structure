@@ -1,3 +1,5 @@
+# This is the default settings file. Do not edit here.
+
 # show how long it took the script to run?
 show_time <- TRUE
 

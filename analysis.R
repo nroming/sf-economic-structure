@@ -19,6 +19,15 @@ source("R/functions.R")
 if(!file.exists("settings.R")){
   message("No 'settings'-file found. Copying the default one from 'R/settings.R' to project root directory. This file is not under version control!")
   file.copy(from = "R/settings.R", to = "settings.R")
+
+  # read, edit and save settings
+  settings <- readLines("settings.R")
+
+  settings <- gsub(settings[1], paste("# Created as a copy of default 'R/settings.R' on", Sys.time()), settings)
+
+  writeLines(settings, "settings.R")
+
+  rm(settings)
 }
 
 source("settings.R")
