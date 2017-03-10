@@ -61,7 +61,7 @@ result_list <- prestimation(x = df,
 result <- result_list$data
 
 # write out result
-write.xlsx(result, file = "output/data/result.xlsx")
+write.xlsx(result, file = file.path(outdir, "data/result.xlsx"))
 
 # post-processing ----
 source("R/post-processing.R")

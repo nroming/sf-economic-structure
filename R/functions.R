@@ -152,7 +152,7 @@ plot_country_results <- function(x, level, scen_hist = "history",
 
   start_country <- 1
 
-  pdf_path <- file.path("output/figures", paste0("country_results_", level,
+  pdf_path <- file.path(outdir, "figures", paste0("country_results_", level,
                                                  ".pdf"))
 
   pdf(pdf_path)

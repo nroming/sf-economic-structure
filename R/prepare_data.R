@@ -18,13 +18,13 @@ vars <- c("gdp" = "GDP",
 g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
          "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
 
-if(!file.exists(("output/data/df.rda"))){
+if(!file.exists(file.path(outdir, "data/df.rda"))){
   message("Reading and preparing data from scratch. This takes a few seconds.")
 
   # include data that was previously taken from the IDA package
   source("R/IDA_independency_data.R")
 
-  saveRDS(idata_n, file = "output/data/idata.rda")
+  saveRDS(idata_n, file = file.path(outdir, "data/idata.rda"))
 
   wdi <- filter(idata_n, source_id == "WDI_2015", variable %in% vars,
                 unit %in% c("bn USD2005/yr", "million", "km2", "1"))
@@ -114,14 +114,14 @@ if(!file.exists(("output/data/df.rda"))){
   rename(spatial = ISO)
 
   # write data to disk
-  saveRDS(df, "output/data/df.rda")
-  saveRDS(map_region, "output/data/map_region.rda")
-  saveRDS(units, "output/data/units.rda")
+  saveRDS(df, file.path(outdir, "data/df.rda"))
+  saveRDS(map_region, file.path(outdir, "data/map_region.rda"))
+  saveRDS(units, file.path(outdir, "data/units.rda"))
 } else {
   message(c("Reading previously saved prepared data to save time. Delete 'output'
   directory to read and prepare data from scratch."))
-  df <- readRDS("output/data/df.rda")
-  map_region <- readRDS("output/data/map_region.rda")
-  idata_n <- readRDS("output/data/idata.rda")
-  units <- readRDS("output/data/units.rda")
+  df <- readRDS(file.path(outdir, "data/df.rda"))
+  map_region <- readRDS(file.path(outdir, "data/map_region.rda"))
+  idata_n <- readRDS(file.path(outdir, "data/idata.rda"))
+  units <- readRDS(file.path(outdir, "data/units.rda"))
 }

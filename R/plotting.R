@@ -26,7 +26,7 @@ ggplot() +
   ylab("Sectoral value added per capita [k USD2005]") +
   xlab("GDP per capita [k USD2005]") +
   facet_wrap( ~ spatial, scales = "free")
-ggsave(filename = "output/figures/va_sec_pc_over_gdp_pc_by_country.png", height = 17, width = 17,
+ggsave(filename = file.path(outdir, "figures/va_sec_pc_over_gdp_pc_by_country.png"), height = 17, width = 17,
        units = "cm")
 
 ggplot() +
@@ -37,7 +37,7 @@ ggplot() +
   scale_colour_brewer(type = "qual", palette = 2) +
   ylab("Sectoral value added per capita") +
   xlab("GDP per capita")
-ggsave(filename = "output/figures/va_sec_pc_over_gdp_pc.png", height = 16, width = 28,
+ggsave(filename = file.path(outdir, "figures/va_sec_pc_over_gdp_pc.png"), height = 16, width = 28,
        units = "cm")
 
 # plot growth rates over GDP per capita ---
@@ -63,7 +63,7 @@ ggplot() +
   # geom_point(data = df_plot, aes(x = gdp_pc, y = va_ser_pc_gr), colour = "red",
   #            alpha = plot_alpha) +
   # geom_smooth(data = df_plot, aes(x = gdp_pc, y = va_ser_pc_gr), method = lm, colour = "red")
-  ggsave(filename = "output/figures/va_sec_pc_gr_over_gdp_pc.png", width = 14, height = 14,
+  ggsave(filename = file.path(outdir, "figures/va_sec_pc_gr_over_gdp_pc.png"), width = 14, height = 14,
          units = "cm")
 
 
@@ -98,7 +98,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
-ggsave("output/figures/country_results_total_G20.png", width = 24, height = 12, units = "cm")
+ggsave(file.path(outdir, "figures/country_results_total_G20.png"), width = 24, height = 12, units = "cm")
 
 ## GDP and sectoral value added per capita for all countries ----
 plot_country_results(result, level = "capita")
@@ -132,7 +132,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~spatial, scales = "free")
-ggsave("output/figures/country_results_capita_G20.png", width = 24, height = 12, units = "cm")
+ggsave(file.path(outdir, "figures/country_results_capita_G20.png"), width = 24, height = 12, units = "cm")
 
 # absolute value added per sector for all regions ----
 tmp_plot_scen <- filter(result_reg, scenario == "SSP2", temporal >= 2015, temporal <= 2050) %>%
@@ -159,7 +159,7 @@ ggplot() +
   theme_bw(base_size = 9) +
   theme(legend.position = "none") +
   facet_wrap(~ spatial, scales = "free")
-ggsave(filename = "output/figures/regions_results_total.pdf", width = 20, height = 28, units = "cm")
+ggsave(filename = file.path(outdir, "figures/regions_results_total.pdf"), width = 20, height = 28, units = "cm")
 
 # regional shares
 tmp_scen <- filter(result_reg, temporal >= 2015, temporal <= 2050, scenario == "SSP2") %>%
@@ -189,7 +189,7 @@ ggplot() +
   theme(legend.position = "none") +
   scale_fill_brewer(type = "qual", palette = 6) +
   facet_wrap(~ spatial)
-ggsave(filename = "output/figures/regions_sectoral_shares.png", width = 32, height = 18,
+ggsave(filename = file.path(outdir, "figures/regions_sectoral_shares.png"), width = 32, height = 18,
        units = "cm")
 
 # historical FE intensities by sector ----
@@ -288,7 +288,7 @@ ggplot() +
   xlab("") +
   ylab("GJ/bn USD2005") +
   facet_grid(spatial ~ sector, scales = "free")
-ggsave(file.path("output/figures", "FEI.png"), width = 18, height = 27, units = "cm")
+ggsave(file.path(outdir, "figures", "FEI.png"), width = 18, height = 27, units = "cm")
 
 # AR5 final energy demand pathways ----
 tmp <- filter(idata_n, source_id == "AR5",
@@ -323,7 +323,7 @@ ggplot() +
   ggtitle("Global final energy demand in 2050 with and without climate policy") +
   facet_wrap(~ model) +
   scale_fill_brewer(type = "qual", palette = 6)
-ggsave("output/figures/AR5_FE.png", width = 28, height = 15, units = "cm")
+ggsave(file.path(outdir, "figures/AR5_FE.png"), width = 28, height = 15, units = "cm")
 
 
 # historical GDP composition for G20 countries ----
@@ -353,7 +353,7 @@ ggplot() +
   geom_point(data = tmp_gdp, aes(x = temporal, y = value), shape = "o") +
   geom_point(data = tmp_rest_sum, aes(x = temporal, y = value), shape = "+") +
   facet_wrap(~ spatial, scales = "free")
-ggsave("output/figures/GDP_check.png", width = 24, height = 18, units = "cm")
+ggsave(file.path(outdir, "figures/GDP_check.png"), width = 24, height = 18, units = "cm")
 
 # compare country level sectoral structure over SSPs ----
 df_plot_hist <- filter(result, scenario == "history",
@@ -391,7 +391,7 @@ for(country in unique(df_plot$spatial)){
     xlab("") +
     ggtitle(country) +
     facet_wrap(~ scenario)
-  ggsave(paste0("output/figures/SSP_compare_level_", country, ".png"),
+  ggsave(paste0(file.path(outdir, "figures/SSP_compare_level_"), country, ".png"),
          width = 24, height = 18, units = "cm")
 }
 
@@ -431,7 +431,7 @@ for(country in unique(df_plot$spatial)){
     xlab("") +
     ggtitle(country) +
     facet_wrap(~ scenario)
-  ggsave(paste0("output/figures/SSP_compare_capita_", country, ".png"),
+  ggsave(paste0(file.path(outdir, "figures/SSP_compare_capita_"), country, ".png"),
          width = 24, height = 18, units = "cm")
 }
 

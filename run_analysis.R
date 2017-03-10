@@ -17,3 +17,10 @@ exp_name = "default"
 source("R/settings.R")
 
 source("R/analysis.R")
+
+# experiment 1 ----
+exp_name = "experiment_626"
+source("R/settings.R") # to reset settings to default
+plotting <- FALSE
+
+source("R/analysis.R")
