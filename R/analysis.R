@@ -1,7 +1,3 @@
-# prepare data ----
-# moved to separate script
-source("R/prepare_data.R")
-
 # adjust historical sectorial value added so that their sum matches the GDP
 if(settings$force_sector_match_gdp){
   df <- mutate(df, va_agr = va_agr/(va_agr + va_ind + va_ser) * gdp,
@@ -66,7 +62,6 @@ saveRDS(result_list, file = file.path(settings$outdir, "data/result_list.rda"))
 
 # post-processing ----
 source("R/post-processing.R")
-
 
 # regional aggregation ----
 result_reg <- inner_join(result, map_region, by = "spatial") %>%

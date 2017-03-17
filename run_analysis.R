@@ -21,6 +21,9 @@ source("R/functions.R")
 # load default settings
 source("R/settings.R")
 
+# prepare common data
+source("R/prepare_data.R")
+
 # default run ----
 settings <- settings_default
 
@@ -36,7 +39,7 @@ settings <- settings_default
 # modify experiment name
 settings$exp_name <- "experiment_626"
 
-# other modifications
+# # other modifications
 settings$plotting <- FALSE
 
 # prepare run

@@ -1,30 +1,14 @@
-# vector of variables
-# ATTENTION: when adding variables here, you have to make sure that the
-# corresponding units are included in the filtering of 'idata_n' below
-vars <- c("gdp" = "GDP",
-          "va_agr" = "Value Added|Agriculture",
-          "va_ind" = "Value Added|Industry",
-          "va_man" = "Value Added|Manufacturing",
-          "va_ser" = "Value Added|Services",
-          "pop" = "Population",
-          "area" = "Area",
-          "ca_share" = "Current account|GDP share",
-          "ex" = "Exports|All",
-          "im" = "Imports|All",
-          "tax_share" = "Taxes|Share")
-
-# G20 memberstates (ATTENTION: other EU members not yet present, also: no
-# sectoral data present for Canada)
-g20 <- c("DEU", "ARG", "AUS", "BRA", "CHN", "FRA", "GBR", "IND", "IDN", "ITA",
-         "JPN", "CAN", "MEX", "RUS", "SAU", "ZAF", "KOR", "TUR", "USA")
-
-if(!file.exists(file.path(settings$outdir, "data/df.rda"))){
+if(!file.exists("output/common/df.rda")){
   message("Reading and preparing data from scratch. This takes a few seconds.")
+
+  if(!dir.exists("output/common")){
+    dir.create("output/common", recursive = TRUE, showWarnings = FALSE)
+  }
 
   # include data that was previously taken from the IDA package
   source("R/IDA_independency_data.R")
 
-  saveRDS(idata_n, file = file.path(settings$outdir, "data/idata.rda"))
+  saveRDS(idata_n, file = "output/common/idata.rda")
 
   wdi <- filter(idata_n, source_id == "WDI_2015", variable %in% vars,
                 unit %in% c("bn USD2005/yr", "million", "km2", "1"))
@@ -114,14 +98,14 @@ if(!file.exists(file.path(settings$outdir, "data/df.rda"))){
   rename(spatial = ISO)
 
   # write data to disk
-  saveRDS(df, file.path(settings$outdir, "data/df.rda"))
-  saveRDS(map_region, file.path(settings$outdir, "data/map_region.rda"))
-  saveRDS(units, file.path(settings$outdir, "data/units.rda"))
+  saveRDS(df, "output/common/df.rda")
+  saveRDS(map_region, "output/common/map_region.rda")
+  saveRDS(units, "output/common/units.rda")
 } else {
   message(c("Reading previously saved prepared data to save time. Delete 'output'
   directory to read and prepare data from scratch."))
-  df <- readRDS(file.path(settings$outdir, "data/df.rda"))
-  map_region <- readRDS(file.path(settings$outdir, "data/map_region.rda"))
-  idata_n <- readRDS(file.path(settings$outdir, "data/idata.rda"))
-  units <- readRDS(file.path(settings$outdir, "data/units.rda"))
+  df <- readRDS("output/common/df.rda")
+  map_region <- readRDS("output/common/map_region.rda")
+  idata_n <- readRDS("output/common/idata.rda")
+  units <- readRDS("output/common/units.rda")
 }
