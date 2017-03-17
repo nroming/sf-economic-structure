@@ -1,5 +1,5 @@
 
-if(force_sector_match_gdp){
+if(settings$force_sector_match_gdp){
   # compute sum of sectoral value added ----
   result <- mutate(result, va_sum_pc = va_agr_pc + va_ind_pc + va_ser_pc,
                    # compute sectoral shares of sum of sectoral value added

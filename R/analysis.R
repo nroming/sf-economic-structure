@@ -3,20 +3,20 @@
 source("R/prepare_data.R")
 
 # adjust historical sectorial value added so that their sum matches the GDP
-if(force_sector_match_gdp){
+if(settings$force_sector_match_gdp){
   df <- mutate(df, va_agr = va_agr/(va_agr + va_ind + va_ser) * gdp,
-             va_ind = va_ind/(va_agr + va_ind + va_ser) * gdp,
-             va_ser = va_ser/(va_agr + va_ind + va_ser) * gdp,
-             va_agr_pc = va_agr_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
-             va_ind_pc = va_ind_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
-             va_ser_pc = va_ser_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc)
+               va_ind = va_ind/(va_agr + va_ind + va_ser) * gdp,
+               va_ser = va_ser/(va_agr + va_ind + va_ser) * gdp,
+               va_agr_pc = va_agr_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
+               va_ind_pc = va_ind_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc,
+               va_ser_pc = va_ser_pc/(va_agr_pc + va_ind_pc + va_ser_pc) * gdp_pc)
 }
 
 # estimation ----
 # determine formulas
-formula_agr <- paste("va_agr_pc", "~", rhs)
-formula_ind <- paste("va_ind_pc", "~", rhs)
-formula_ser <- paste("va_ser_pc", "~", rhs)
+formula_agr <- paste("va_agr_pc", "~", settings$rhs)
+formula_ind <- paste("va_ind_pc", "~", settings$rhs)
+formula_ser <- paste("va_ser_pc", "~", settings$rhs)
 
 # preallocate lsit for results
 models_agr <- list()
@@ -29,7 +29,7 @@ rsq_ind <- data.frame()
 rsq_ser <- data.frame()
 
 # model selection ----
-for (i in 1:length(rhs)){
+for (i in 1:length(settings$rhs)){
   models_agr[[i]] <- lm(as.formula(formula_agr[i]), data = df)
   models_ind[[i]] <- lm(as.formula(formula_ind[i]), data = df)
   models_ser[[i]] <- lm(as.formula(formula_ser[i]), data = df)
@@ -61,7 +61,8 @@ result_list <- prestimation(x = df,
 result <- result_list$data
 
 # write out result
-write.xlsx(result, file = file.path(outdir, "data/result.xlsx"))
+write.xlsx(result, file = file.path(settings$outdir, "data/result.xlsx"))
+saveRDS(result_list, file = file.path(settings$outdir, "data/result_list.rda"))
 
 # post-processing ----
 source("R/post-processing.R")
@@ -83,6 +84,4 @@ result_reg <- mutate(result_reg, sum_va = va_agr + va_ind + va_ser,
                      share_ser = va_ser/sum_va)
 
 # plotting ----
-if(plotting) source("R/plotting.R")
-
-if(show_time) print(Sys.time() - start_time)
+if(settings$plotting) source("R/plotting.R")

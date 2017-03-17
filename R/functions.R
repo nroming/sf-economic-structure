@@ -1,4 +1,4 @@
-prestimation <- function(x = df, ref_country = country_ref,
+prestimation <- function(x = df, ref_country = settings$country_ref,
                          formula_agr, formula_ind, formula_ser,
                          debug_function = FALSE){
 
@@ -108,7 +108,8 @@ plot_country_results <- function(x, level, scen_hist = "history",
                                  t_present = 2015,
                                  t_max = 2100,
                                  debug_function = FALSE,
-                                 ref_country = country_ref){
+                                 ref_country = country_ref,
+                                 run_settings = settings){
 
   if(debug_function){
     browser()
@@ -152,7 +153,7 @@ plot_country_results <- function(x, level, scen_hist = "history",
 
   start_country <- 1
 
-  pdf_path <- file.path(outdir, "figures", paste0("country_results_", level,
+  pdf_path <- file.path(run_settings$outdir, "figures", paste0("country_results_", level,
                                                  ".pdf"))
 
   pdf(pdf_path)
@@ -190,3 +191,43 @@ plot_country_results <- function(x, level, scen_hist = "history",
 
 # include functionality that was previously taken from the IDA package
 source("R/IDA_independency_functions.R")
+
+# this function creates directory structure
+prepare_run <- function(settings_list){
+
+  # create right hand side of formulas
+  rhs <- list()
+
+  for (m in 1:length(settings_list$regressors)){
+    tmp <-  combn(settings_list$regressors, m, simplify = FALSE)
+
+    tmp <- lapply(tmp, paste0, collapse = " + ")
+
+    rhs <- append(rhs, tmp)
+  }
+
+  rhs <- as.character(rhs)
+
+  # create directory structure
+  # output folder for the specific run
+  outdir <- file.path("output", settings_list$exp_name)
+
+  if(!dir.exists(file.path(outdir, "figures"))){
+    dir.create(file.path(outdir, "figures"), recursive = TRUE, showWarnings = FALSE)
+  }
+
+  if(!dir.exists(file.path(outdir, "data"))){
+    dir.create(file.path(outdir, "data"), recursive = TRUE, showWarnings = FALSE)
+  }
+
+  # append to settings_list
+  settings_list$rhs <- rhs
+  settings_list$outdir <- outdir
+
+  # write out settings to disk
+  sink(file.path(outdir, "settings.txt"))
+  print(settings_list)
+  sink()
+
+  return(settings_list)
+}
