@@ -5,6 +5,7 @@ library(readxl)
 library(countrycode)
 library(dplyr)
 library(openxlsx)
+library(beepr)
 
 rm(list = ls())
 
@@ -47,5 +48,5 @@ settings <- prepare_run(settings)
 
 source("R/analysis.R")
 
-# display elapsed time
-print(Sys.time() - start_time)
+# play a sound to that you know the run is finished and elasped time
+beep(sound = 2, print(Sys.time() - start_time))
