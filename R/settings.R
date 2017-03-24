@@ -32,7 +32,10 @@ vars <- c("gdp" = "GDP",
           "ca_share" = "Current account|GDP share",
           "ex" = "Exports|All",
           "im" = "Imports|All",
-          "tax_share" = "Taxes|Share")
+          "tax_share" = "Taxes|Share",
+          "va_agr_share" = "Value Added|Agriculture|GDP share",
+          "va_ind_share" = "Value Added|Industry|GDP share",
+          "va_ser_share" = "Value Added|Services|GDP share")
 
 # G20 memberstates (ATTENTION: other EU members not yet present, also: no
 # sectoral data present for Canada)
