@@ -436,12 +436,17 @@ for(country in unique(df_plot$spatial)){
 }
 
 # plot growth rates
-tmp <- filter(result, spatial == "USA") %>%
+country <- "USA"
+
+tmp <- filter(result, spatial == country) %>%
   select(scenario, temporal, va_agr_pc_gr, va_ind_pc_gr, va_ser_pc_gr)
 
 tmp <- melt(tmp, id.vars = c("scenario", "temporal"))
 
 ggplot(tmp) +
   geom_line(aes(x = temporal, y = value, group = scenario, colour = scenario)) +
-  ylim(-0.1, 0.1) +
-  facet_wrap(~ variable)
+  # ylim(-0.1, 0.1) +
+  facet_wrap(~ variable, scales = "free")
+
+ggsave(paste0(file.path(settings$outdir, "figures/SSP_compare_growth_rates_"), country, ".png"),
+         width = 24, height = 18, units = "cm")
