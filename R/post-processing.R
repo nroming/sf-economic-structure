@@ -29,12 +29,15 @@ if(settings$force_sector_match_gdp){
 
 # calculate growth rates
 result <- group_by(result, scenario, spatial) %>%
-  mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) /
-           lag(va_agr_pc, n = 1, order_by = temporal) - 1,
-         va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) /
-           lag(va_ind_pc, n = 1, order_by = temporal) - 1,
-         va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) /
-           lag(va_ser_pc, n = 1, order_by = temporal) - 1) %>%
+  mutate(va_agr_pc_gr = (lag(va_agr_pc, n = 0, order_by = temporal) /
+           lag(va_agr_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) -
+           lag(temporal, n = 1, order_by = temporal))) - 1,
+         va_ind_pc_gr = (lag(va_ind_pc, n = 0, order_by = temporal) /
+           lag(va_ind_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) -
+           lag(temporal, n = 1, order_by = temporal))) - 1,
+         va_ser_pc_gr = (lag(va_ser_pc, n = 0, order_by = temporal) /
+           lag(va_ser_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) -
+           lag(temporal, n = 1, order_by = temporal))) - 1) %>%
   ungroup()
 
 
