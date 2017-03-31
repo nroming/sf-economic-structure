@@ -15,7 +15,10 @@ settings_default <- list(
 
   # define right hand side of regression formula ----
   regressors = c("gdp_pc", "I(gdp_pc^2)", "I(gdp_pc^3)", "spatial", "recession",
-                 "pop_dens", "temporal", "ratio_gdp_pc2glob")
+                 "pop_dens", "temporal", "ratio_gdp_pc2glob"),
+
+  # determine left hand side of formula
+  lhs_levels = TRUE
 )
 
 # vector of variables

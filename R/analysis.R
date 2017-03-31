@@ -10,9 +10,17 @@ if(settings$force_sector_match_gdp){
 
 # estimation ----
 # determine formulas
-formula_agr <- paste("va_agr_pc", "~", settings$rhs)
-formula_ind <- paste("va_ind_pc", "~", settings$rhs)
-formula_ser <- paste("va_ser_pc", "~", settings$rhs)
+# levels or shares?
+if(settings$lhs_levels){
+  formula_agr <- paste("va_agr_pc", "~", settings$rhs)
+  formula_ind <- paste("va_ind_pc", "~", settings$rhs)
+  formula_ser <- paste("va_ser_pc", "~", settings$rhs)
+} else {
+  formula_agr <- paste("va_agr_share", "~", settings$rhs)
+  formula_ind <- paste("va_ind_share", "~", settings$rhs)
+  formula_ser <- paste("va_ser_share", "~", settings$rhs)
+}
+
 
 # preallocate lsit for results
 models_agr <- list()

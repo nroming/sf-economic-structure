@@ -28,6 +28,9 @@ source("R/prepare_data.R")
 # default run ----
 settings <- settings_default
 
+# modify experiment name
+settings$exp_name <- "levels"
+
 # prepare run
 settings <- prepare_run(settings)
 
@@ -38,10 +41,13 @@ source("R/analysis.R")
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "experiment_626"
+settings$exp_name <- "shares"
+
+# use shares as explained variables
+settings$lhs_levels <- FALSE
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # prepare run
 settings <- prepare_run(settings)

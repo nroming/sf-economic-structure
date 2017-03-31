@@ -1,6 +1,7 @@
 prestimation <- function(x = df, ref_country = settings$country_ref,
                          formula_agr, formula_ind, formula_ser,
-                         debug_function = FALSE){
+                         debug_function = FALSE,
+                         prestimate_levels = settings$lhs_levels){
 
   if(debug_function){
     browser()
@@ -53,7 +54,8 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
                     "ind" = countries_ind,
                     "ser" = countries_agr)
 
-  # check if there are fixed effects present for agriculture and predict accordingly
+if(prestimate_levels){
+    # check if there are fixed effects present for agriculture and predict accordingly
   if(length(countries_agr) > 1){
     x_scen[x_scen$spatial %in% countries_agr, "va_agr_pc"] <-
       predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
@@ -84,6 +86,40 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
                    va_ser = va_ser_pc * pop)
 
   df <- rbind(x_hist, x_scen)
+} else {
+    # check if there are fixed effects present for agriculture and predict accordingly
+  if(length(countries_agr) > 1){
+    x_scen[x_scen$spatial %in% countries_agr, "va_agr_share"] <-
+      predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
+  } else {
+    x_scen$va_agr_share = predict(model_agr, newdata = x_scen)
+  }
+
+  # check if there are fixed effects present for industry and predict accordingly
+  if(length(countries_ind) > 1){
+    x_scen[x_scen$spatial %in% countries_ind, "va_ind_share"] <-
+      predict(model_ind, newdata = filter(x_scen, spatial %in% countries_ind))
+  } else {
+    x_scen$va_ind_share = predict(model_ind, newdata = x_scen)
+  }
+
+  # check if there are fixed effects present for services and predict accordingly
+  if(length(countries_ser) > 1){
+    x_scen[x_scen$spatial %in% countries_ser, "va_ser_share"] <-
+      predict(model_ser, newdata = filter(x_scen, spatial %in% countries_ser))
+  } else {
+    x_scen$va_ser_share = predict(model_ser, newdata = x_scen)
+  }
+
+  # compute service sector as residual and level values
+  x_scen <- mutate(x_scen,
+                   va_agr = va_agr_share * gdp,
+                   va_ind = va_ind_share * gdp,
+                   va_ser = va_ser_share * gdp)
+
+  df <- rbind(x_hist, x_scen)
+}
+
 
   # compute GDP(pC) resulting from projections and deviation
   df <- mutate(df, gdp_pc_pred = va_agr_pc + va_ind_pc + va_ser_pc,
