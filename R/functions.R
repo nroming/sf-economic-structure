@@ -134,7 +134,10 @@ if(prestimate_levels){
                  "model_agr" = model_agr,
                  "model_ind" = model_ind,
                  "model_ser" = model_ser,
-                 "countries" = countries)
+                 "countries" = countries,
+                 "formula_agr" = formula_agr,
+                 "formula_ind" = formula_ind,
+                 "formula_ser" = formula_ser)
 
   return(result)
 }
@@ -266,4 +269,39 @@ prepare_run <- function(settings_list){
   sink()
 
   return(settings_list)
+}
+
+plot_hist_fit_pred <- function(x, country, end_year){
+  xdf <- x$data
+  tmp_hist <- filter(xdf, spatial == country, scenario == "history")
+  tmp_scen <- filter(xdf, spatial == country, scenario != "history", temporal <= end_year)
+
+  tmp_fit <- filter(xdf, spatial %in% country, scenario == "history",
+                    temporal <= end_year)
+
+  tmp_fit$va_agr_pc_fit <- predict(x$model_agr, newdata = tmp_fit)
+  tmp_fit$va_ind_pc_fit <- predict(x$model_ind, newdata = tmp_fit)
+  tmp_fit$va_ser_pc_fit <- predict(x$model_ser, newdata = tmp_fit)
+
+  p <- ggplot() +
+    #agriculture
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_agr_pc), colour = "green") +
+    geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_agr_pc, group = scenario,
+                                   colour = scenario)) +
+    geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_agr_pc_fit), colour = "green") +
+    # industry
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ind_pc), colour = "brown") +
+    geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_ind_pc, group = scenario,
+                                   colour = scenario)) +
+    geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ind_pc_fit), colour = "brown") +
+    #services
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ser_pc), colour = "blue") +
+    geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_ser_pc, group = scenario,
+                                   colour = scenario)) +
+    geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ser_pc_fit), colour = "blue") +
+    theme_light() +
+    ggtitle(paste(country, "until", end_year))
+
+  print(p)
+  return(p)
 }
