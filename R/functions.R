@@ -272,16 +272,32 @@ prepare_run <- function(settings_list){
 }
 
 plot_hist_fit_pred <- function(x, country, end_year){
-  xdf <- x$data
-  tmp_hist <- filter(xdf, spatial == country, scenario == "history")
-  tmp_scen <- filter(xdf, spatial == country, scenario != "history", temporal <= end_year)
+  # preallocate data frames
+  xdf <- data.frame()
+  tmp_hist <- data.frame()
+  tmp_scen <- data.frame()
+  tmp_fit <- data.frame()
 
-  tmp_fit <- filter(xdf, spatial %in% country, scenario == "history",
+  for(run in names(x)){
+    xdf_loop <- x[[run]]$data
+    xdf_loop$run <- run
+
+  tmp_hist_loop <- filter(xdf_loop, spatial == country, scenario == "history")
+  tmp_scen_loop <- filter(xdf_loop, spatial == country, scenario != "history", temporal <= end_year)
+
+  tmp_fit_loop <- filter(xdf_loop, spatial %in% country, scenario == "history",
                     temporal <= end_year)
 
-  tmp_fit$va_agr_pc_fit <- predict(x$model_agr, newdata = tmp_fit)
-  tmp_fit$va_ind_pc_fit <- predict(x$model_ind, newdata = tmp_fit)
-  tmp_fit$va_ser_pc_fit <- predict(x$model_ser, newdata = tmp_fit)
+  tmp_fit_loop$va_agr_pc_fit <- predict(x[[run]]$model_agr, newdata = tmp_fit_loop)
+  tmp_fit_loop$va_ind_pc_fit <- predict(x[[run]]$model_ind, newdata = tmp_fit_loop)
+  tmp_fit_loop$va_ser_pc_fit <- predict(x[[run]]$model_ser, newdata = tmp_fit_loop)
+
+  # combine results
+  xdf <- rbind(xdf, xdf_loop)
+  tmp_hist <- rbind(tmp_hist, tmp_hist_loop)
+  tmp_scen <- rbind(tmp_scen, tmp_scen_loop)
+  tmp_fit <- rbind(tmp_fit, tmp_fit_loop)
+  }
 
   p <- ggplot() +
     #agriculture
@@ -300,6 +316,7 @@ plot_hist_fit_pred <- function(x, country, end_year){
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ser_pc_fit), colour = "blue") +
     theme_light() +
+    facet_wrap(~ run) +
     ggtitle(paste(country, "until", end_year))
 
   print(p)

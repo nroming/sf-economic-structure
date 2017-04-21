@@ -8,6 +8,8 @@ runs <- dir("output")
 runs <- runs[-grepl("common", runs)]
 runs <- runs[-grepl("comparison", runs)]
 
+result_all <- list()
+
 # extract necessary information ----
 for(run in runs){
   path_to_run <- file.path("output", run)
@@ -15,12 +17,14 @@ for(run in runs){
   # load result
   run_result <- readRDS(file.path(path_to_run, "data", "result_list.rda"))
 
-  for (c in c("USA", "IND", "CHN", "NGA")){
-    p <- plot_hist_fit_pred(x  = run_result, country = c, end_year = 2020)
-    ggsave(plot = p, filename = file.path("output", "comparison",
-                                          paste0("fit_", run, "_", c, ".png")))
-  }
+  # add run
+  result_all[run] <- list(run_result)
 
+}
 
-
+for (c in c("USA", "IND", "CHN", "NGA", "DEU", "BRA", "MEX", "RUS", "JPN",
+            "EGY")){
+  p <- plot_hist_fit_pred(x  = result_all, country = c, end_year = 2020)
+  ggsave(plot = p, filename = file.path("output", "comparison",
+                                        paste0("fit_", c, ".png")))
 }
