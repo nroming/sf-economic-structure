@@ -25,26 +25,29 @@ source("R/settings.R")
 # prepare common data
 source("R/prepare_data.R")
 
-# default run ----
+# reduced complexity run ----
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "levels"
+settings$exp_name <- "reduced"
+
+# modify model complexity
+settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
+                         "pop_dens", "temporal", "ratio_gdp_pc2glob")
+
+settings$plotting <- TRUE
 
 # prepare run
 settings <- prepare_run(settings)
 
 source("R/analysis.R")
 
-# experiment 1 ----
+# shares ----
 # load default settings
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "shares"
-
-# use shares as explained variables
-settings$lhs_levels <- FALSE
+settings$exp_name <- "full"
 
 # # other modifications
 settings$plotting <- TRUE
