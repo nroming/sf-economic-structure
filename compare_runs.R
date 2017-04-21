@@ -13,7 +13,7 @@ for(run in runs){
   for (c in c("USA", "IND", "CHN", "BGL")){
     p <- plot_hist_fit_pred(x  = run_result, country = c, end_year = 2030)
     ggsave(plot = p, filename = file.path(path_to_run, "figures",
-                                          paste0("fit_", c, ".png")))
+                                          paste0("fit_", run, "_", c, ".png")))
   }
 
 
