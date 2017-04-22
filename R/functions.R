@@ -277,6 +277,7 @@ plot_hist_fit_pred <- function(x, country, end_year){
   tmp_hist <- data.frame()
   tmp_scen <- data.frame()
   tmp_fit <- data.frame()
+  model_stats <- data.frame()
 
   for(run in names(x)){
     xdf_loop <- x[[run]]$data
@@ -297,8 +298,24 @@ plot_hist_fit_pred <- function(x, country, end_year){
   tmp_hist <- rbind(tmp_hist, tmp_hist_loop)
   tmp_scen <- rbind(tmp_scen, tmp_scen_loop)
   tmp_fit <- rbind(tmp_fit, tmp_fit_loop)
-  }
 
+  # model statistics
+  model_stats_loop <- data.frame("run" = rep(run, 3),
+                                 "sector" = c("agr", "ind", "ser"),
+                                 "equation" = NA,
+                                 "y_label" = max(tmp_scen_loop$va_ser_pc, na.rm = TRUE))
+
+  # equation
+  model_stats_loop[model_stats_loop$sector == "agr", "equation"] <-
+    deparse(x[[run]]$formula_agr, width.cutoff = 200)
+  model_stats_loop[model_stats_loop$sector == "ind", "equation"] <-
+    deparse(x[[run]]$formula_ind, width.cutoff = 200)
+  model_stats_loop[model_stats_loop$sector == "ser", "equation"] <-
+    deparse(x[[run]]$formula_ser, width.cutoff = 200)
+
+  model_stats <- rbind(model_stats, model_stats_loop)
+  }
+# browser()
   p <- ggplot() +
     #agriculture
     geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_agr_pc), colour = "green") +
@@ -316,6 +333,12 @@ plot_hist_fit_pred <- function(x, country, end_year){
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ser_pc_fit), colour = "blue") +
     theme_light() +
+    annotate("text", x = 0, y = max(model_stats[model_stats$sector == "agr", "y_label"]),
+             label = model_stats[model_stats$sector == "agr", "equation"], size = 1, hjust = 0) +
+        annotate("text", x = 0, y = 0.9*max(model_stats[model_stats$sector == "ind", "y_label"]),
+             label = model_stats[model_stats$sector == "ind", "equation"], size = 1, hjust = 0) +
+        annotate("text", x = 0, y = 0.8*max(model_stats[model_stats$sector == "ser", "y_label"]),
+             label = model_stats[model_stats$sector == "ser", "equation"], size = 1, hjust = 0) +
     facet_wrap(~ run) +
     ggtitle(paste(country, "until", end_year))
 
