@@ -1,12 +1,3 @@
-library(reshape2)
-library(ggplot2)
-library(readr)
-library(readxl)
-library(countrycode)
-library(dplyr)
-library(openxlsx)
-library(beepr)
-
 rm(list = ls())
 
 # disable scientific notation
@@ -18,6 +9,12 @@ options(warn = -1)
 start_time <- Sys.time()
 
 source("R/functions.R")
+
+# define needed packages
+packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", "openxlsx", "beepr")
+
+# check if needed packags are installed and do so, if not
+ipak(packages)
 
 # load default settings
 source("R/settings.R")
