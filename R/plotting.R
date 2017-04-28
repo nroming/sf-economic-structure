@@ -105,7 +105,7 @@ plot_country_results(result, level = "capita")
 
 # G20 only
 tmp_plot_scen <- filter(result, scenario == "SSP2", temporal >= 2015,
-                        temporal <= 2050, spatial %in% g20) %>%
+                        temporal <= 2030, spatial %in% g20) %>%
   select(scenario, spatial, temporal, gdp_pc, va_agr_pc, va_ind_pc, va_ser_pc)
 
 tmp_plot_hist <- filter(result, scenario == "history", temporal < 2015,

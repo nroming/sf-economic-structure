@@ -40,6 +40,7 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
   x_scen <- filter(x_scen, !(spatial %in% setequal(unique(x_scen$spatial),
                                                    unique(x_hist$spatial))))
 
+  # estimation
   model_agr <- lm(formula = formula_agr, data = x_hist)
   model_ind <- lm(formula = formula_ind, data = x_hist)
   model_ser <- lm(formula = formula_ser, data = x_hist)
@@ -54,6 +55,7 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
                     "ind" = countries_ind,
                     "ser" = countries_agr)
 
+  # prediction
 if(prestimate_levels){
     # check if there are fixed effects present for agriculture and predict accordingly
   if(length(countries_agr) > 1){

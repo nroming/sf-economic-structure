@@ -109,3 +109,45 @@ if(!file.exists("output/common/df.rda")){
   idata_n <- readRDS("output/common/idata.rda")
   units <- readRDS("output/common/units.rda")
 }
+
+# create some common plots ---
+if(!dir.exists("output/common/figures")){
+  dir.create("output/common/figures", recursive = TRUE, showWarnings = FALSE)
+}
+
+gdppc_comp <- filter(df, temporal %in% 2010:2015, scenario %in% c("history", "SSP2")) %>%
+  select(scenario, spatial, temporal, gdp_pc)
+
+gdppc_comp <- dcast(gdppc_comp, spatial + temporal ~ scenario, value.var = "gdp_pc")
+
+# interpolation of missing values
+gdppc_comp <- group_by(gdppc_comp, spatial) %>%
+  mutate(SSP2 = na.approx(SSP2, along = temporal)) %>%
+  ungroup() %>%
+  filter(temporal %in% c(2010, 2014))
+
+gdppc_comp <- mutate(gdppc_comp, deviation = abs((SSP2 - history)/history),
+                    label = NA,
+                    spatial = as.character(spatial)) %>%
+  filter(!is.na(deviation))
+
+gdppc_comp[gdppc_comp$deviation > 0.1 & gdppc_comp$temporal == 2010, "label"] <-
+  gdppc_comp[gdppc_comp$deviation > 0.1 & gdppc_comp$temporal == 2010, "spatial"]
+
+# compute the total error
+err_tot <- group_by(gdppc_comp, temporal) %>%
+  summarize(dev_avg = mean(deviation, na.rm = TRUE))
+
+# log transformation
+gdppc_comp <- mutate(gdppc_comp, history = log(history),
+                     SSP2 = log(SSP2))
+
+# transform year to character
+gdppc_comp <- mutate(gdppc_comp, temporal = as.character(temporal))
+
+ggplot() +
+  geom_line(data = gdppc_comp, aes(x = history, y = SSP2, group = spatial), size = 0.3) +
+  geom_text(data = gdppc_comp, aes(x = history, y = SSP2, label = label, hjust = -0.2), size = 1.4) +
+  geom_abline(intercept = 0, slope = 1, size = 0.1) +
+  theme_light(base_size = 11)
+ggsave("output/common/figures/compare_GDPpC_data.png", width = 12, height = 8, units = "cm")
