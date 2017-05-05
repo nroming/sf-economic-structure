@@ -11,7 +11,7 @@ start_time <- Sys.time()
 source("R/functions.R")
 
 # define needed packages
-packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", "openxlsx", "beepr")
+packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", "openxlsx", "beepr", "zoo")
 
 # check if needed packags are installed and do so, if not
 ipak(packages)
@@ -39,15 +39,44 @@ settings <- prepare_run(settings)
 
 source("R/analysis.R")
 
-# shares ----
+# population weights ----
 # load default settings
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "full"
+settings$exp_name <- "weights_pop"
+
+# modify model complexity
+settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
+                         "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
 settings$plotting <- TRUE
+
+# use weighed regression
+settings$regression_weights <- "pop"
+
+# prepare run
+settings <- prepare_run(settings)
+
+source("R/analysis.R")
+
+# gdp weights ----
+# load default settings
+settings <- settings_default
+
+# modify experiment name
+settings$exp_name <- "weights_gdp"
+
+# modify model complexity
+settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
+                         "pop_dens", "temporal", "ratio_gdp_pc2glob")
+
+# # other modifications
+settings$plotting <- TRUE
+
+# use weighed regression
+settings$regression_weights <- "gdp"
 
 # prepare run
 settings <- prepare_run(settings)

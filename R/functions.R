@@ -1,7 +1,8 @@
 prestimation <- function(x = df, ref_country = settings$country_ref,
                          formula_agr, formula_ind, formula_ser,
                          debug_function = FALSE,
-                         prestimate_levels = settings$lhs_levels){
+                         prestimate_levels = settings$lhs_levels,
+                         w = settings$regression_weights){
 
   if(debug_function){
     browser()
@@ -40,10 +41,29 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
   x_scen <- filter(x_scen, !(spatial %in% setequal(unique(x_scen$spatial),
                                                    unique(x_hist$spatial))))
 
+  # make sure all the data is complete since otherwise the weights will not work
+  # x_hist <- x_hist[complete.cases(x_hist[c(all.vars(formula_agr), get(w))]), ]
+
   # estimation
-  model_agr <- lm(formula = formula_agr, data = x_hist)
-  model_ind <- lm(formula = formula_ind, data = x_hist)
-  model_ser <- lm(formula = formula_ser, data = x_hist)
+  switch(w,
+         # no regression weights
+         "none" = {
+           model_agr <- lm(formula = formula_agr, data = x_hist)
+           model_ind <- lm(formula = formula_ind, data = x_hist)
+           model_ser <- lm(formula = formula_ser, data = x_hist)
+         },
+         # population as regression weight
+         "pop" = {
+           model_agr <- lm(formula = formula_agr, data = x_hist, weights = pop)
+           model_ind <- lm(formula = formula_ind, data = x_hist, weights = pop)
+           model_ser <- lm(formula = formula_ser, data = x_hist, weights = pop)
+         },
+         # GDP as regression weight
+         "gdp" = {
+           model_agr <- lm(formula = formula_agr, data = x_hist, weights = gdp)
+           model_ind <- lm(formula = formula_ind, data = x_hist, weights = gdp)
+           model_ser <- lm(formula = formula_ser, data = x_hist, weights = gdp)
+         })
 
   # due to the fixed effect prediction can only be done for countries for which
   # estimation has been carried out

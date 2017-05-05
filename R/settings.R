@@ -18,7 +18,10 @@ settings_default <- list(
                  "pop_dens", "temporal", "ratio_gdp_pc2glob"),
 
   # determine left hand side of formula
-  lhs_levels = TRUE
+  lhs_levels = TRUE,
+
+  # determine regression weights
+  regression_weights = "none"
 )
 
 # vector of variables
