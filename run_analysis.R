@@ -16,10 +16,6 @@ packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", 
 # check if needed packags are installed and do so, if not
 ipak(packages)
 
-# register parallel backend to use 4 processors
-cl <- makeCluster(4)
-registerDoParallel(cl)
-
 # load default settings
 source("R/settings.R")
 
@@ -36,7 +32,7 @@ settings$exp_name <- "reduced"
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -55,7 +51,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # use weighed regression
 settings$regression_weights <- "pop"
@@ -77,7 +73,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # use weighed regression
 settings$regression_weights <- "gdp"

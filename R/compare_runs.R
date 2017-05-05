@@ -1,3 +1,5 @@
+if(!exists("g20")) source("R/settings.R")
+
 # create directory for comparisons ----
 dir.create(file.path("output", "comparison"))
 
@@ -22,10 +24,12 @@ for(run in runs){
 
 }
 
-microbenchmark(foreach (c =  1:length(g20), .packages = "ggplot2") %dopar% {
-  try(p <- plot_hist_fit_pred(x  = result_all, country = g20[c], end_year = 2020))
+countries <- g20
+
+for (country in countries){
+  try(p <- plot_hist_fit_pred(x  = result_all, country = country, end_year = 2020))
   try(ggsave(plot = p, filename = file.path("output", "comparison",
-                                            paste0("fit_", g20[c], ".png")),
-             width = 18, height = 10, units = "cm"))
-}, times = 3)
+                                        paste0("fit_", country, ".png")),
+         width = 18, height = 10, units = "cm"))
+}
 
