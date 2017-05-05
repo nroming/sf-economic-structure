@@ -354,7 +354,7 @@ plot_hist_fit_pred <- function(x, country, end_year){
     geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_ser_pc, group = scenario,
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ser_pc_fit), colour = "blue") +
-    theme_light() +
+    theme_light(base_size = 9) +
     annotate("text", x = 0, y = max(model_stats[model_stats$sector == "agr", "y_label"]),
              label = model_stats[model_stats$sector == "agr", "equation"], size = 1, hjust = 0) +
     annotate("text", x = 0, y = 0.9*max(model_stats[model_stats$sector == "ind", "y_label"]),
@@ -362,6 +362,7 @@ plot_hist_fit_pred <- function(x, country, end_year){
     annotate("text", x = 0, y = 0.8*max(model_stats[model_stats$sector == "ser", "y_label"]),
              label = model_stats[model_stats$sector == "ser", "equation"], size = 1, hjust = 0) +
     facet_wrap(~ run) +
+    labs(x = "GDP per capita [thousand USD2005/yr]", y = "Sectoral value added per capita [thousand USD2005/yr]") +
     ggtitle(paste(country, "until", end_year))
 
   print(p)
