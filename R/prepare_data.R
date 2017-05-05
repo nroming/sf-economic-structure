@@ -18,18 +18,12 @@ if(!file.exists("output/common/df.rda")){
                     unit == "bn USD2005/yr",
                     temporal >= 2010)
 
-  # ssp_gdp <- interpolate_missing_years(ssp_gdp)
-
   ssp_pop <- filter(idata_n, source_id == "SSP", model == "IIASA-WiC POP",
                     variable == "Population",
                     unit == "million",
                     temporal >= 2010)
 
-  # ssp_pop <- interpolate_missing_years(ssp_pop)
-
   df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
-
-  # df <- filter(df, spatial %in% g20)
 
   rm(wdi, ssp_pop, ssp_gdp) # clean up
 
