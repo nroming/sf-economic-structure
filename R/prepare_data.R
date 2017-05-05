@@ -23,6 +23,13 @@ if(!file.exists("output/common/df.rda")){
                     unit == "million",
                     temporal >= 2010)
 
+  ssp_urb <- filter(idata_n, source_id == "SSP", model == "NCAR",
+                    variable == "Population|Urban|Share",
+                    unit == "%",
+                    temporal >= 2010) %>%
+    mutate(value = value/100,
+           unit = "1")
+
   df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
 
   rm(wdi, ssp_pop, ssp_gdp) # clean up

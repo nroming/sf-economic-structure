@@ -41,7 +41,8 @@ vars <- c("gdp" = "GDP",
           "tax_share" = "Taxes|Share",
           "va_agr_share" = "Value Added|Agriculture|GDP share",
           "va_ind_share" = "Value Added|Industry|GDP share",
-          "va_ser_share" = "Value Added|Services|GDP share")
+          "va_ser_share" = "Value Added|Services|GDP share",
+          "urb_share" = "Population|Urban|Share")
 
 # G20 memberstates (ATTENTION: other EU members not yet present, also: no
 # sectoral data present for Canada)
