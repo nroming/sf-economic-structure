@@ -32,7 +32,7 @@ settings$exp_name <- "reduced"
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -51,7 +51,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # use weighed regression
 settings$regression_weights <- "pop"
@@ -73,7 +73,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # use weighed regression
 settings$regression_weights <- "gdp"
