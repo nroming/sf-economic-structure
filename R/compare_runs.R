@@ -22,9 +22,9 @@ for(run in runs){
 
 }
 
-for (c in c("USA", "IND", "CHN", "NGA")){
-  p <- plot_hist_fit_pred(x  = result_all, country = c, end_year = 2020)
-  ggsave(plot = p, filename = file.path("output", "comparison",
-                                        paste0("fit_", c, ".png")),
-         width = 18, height = 10, units = "cm")
+for (c in g20){
+  try(p <- plot_hist_fit_pred(x  = result_all, country = c, end_year = 2020))
+  try(ggsave(plot = p, filename = file.path("output", "comparison",
+                                            paste0("fit_", c, ".png")),
+             width = 18, height = 10, units = "cm"))
 }

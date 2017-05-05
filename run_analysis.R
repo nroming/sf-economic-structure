@@ -83,5 +83,8 @@ settings <- prepare_run(settings)
 
 source("R/analysis.R")
 
+# compare runs ---
+source("R/compare_runs.R")
+
 # play a sound to that you know the run is finished and elasped time
 beep(sound = 2, print(Sys.time() - start_time))
