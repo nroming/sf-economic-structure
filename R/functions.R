@@ -76,71 +76,71 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
                     "ser" = countries_agr)
 
   # prediction
-if(prestimate_levels){
+  if(prestimate_levels){
     # check if there are fixed effects present for agriculture and predict accordingly
-  if(length(countries_agr) > 1){
-    x_scen[x_scen$spatial %in% countries_agr, "va_agr_pc"] <-
-      predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
+    if(length(countries_agr) > 1){
+      x_scen[x_scen$spatial %in% countries_agr, "va_agr_pc"] <-
+        predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
+    } else {
+      x_scen$va_agr_pc = predict(model_agr, newdata = x_scen)
+    }
+
+    # check if there are fixed effects present for industry and predict accordingly
+    if(length(countries_ind) > 1){
+      x_scen[x_scen$spatial %in% countries_ind, "va_ind_pc"] <-
+        predict(model_ind, newdata = filter(x_scen, spatial %in% countries_ind))
+    } else {
+      x_scen$va_ind_pc = predict(model_ind, newdata = x_scen)
+    }
+
+    # check if there are fixed effects present for services and predict accordingly
+    if(length(countries_ser) > 1){
+      x_scen[x_scen$spatial %in% countries_ser, "va_ser_pc"] <-
+        predict(model_ser, newdata = filter(x_scen, spatial %in% countries_ser))
+    } else {
+      x_scen$va_ser_pc = predict(model_ser, newdata = x_scen)
+    }
+
+    # compute service sector as residual and level values
+    x_scen <- mutate(x_scen,
+                     va_agr = va_agr_pc * pop,
+                     va_ind = va_ind_pc * pop,
+                     va_ser = va_ser_pc * pop)
+
+    df <- rbind(x_hist, x_scen)
   } else {
-    x_scen$va_agr_pc = predict(model_agr, newdata = x_scen)
-  }
-
-  # check if there are fixed effects present for industry and predict accordingly
-  if(length(countries_ind) > 1){
-    x_scen[x_scen$spatial %in% countries_ind, "va_ind_pc"] <-
-      predict(model_ind, newdata = filter(x_scen, spatial %in% countries_ind))
-  } else {
-    x_scen$va_ind_pc = predict(model_ind, newdata = x_scen)
-  }
-
-  # check if there are fixed effects present for services and predict accordingly
-  if(length(countries_ser) > 1){
-    x_scen[x_scen$spatial %in% countries_ser, "va_ser_pc"] <-
-      predict(model_ser, newdata = filter(x_scen, spatial %in% countries_ser))
-  } else {
-    x_scen$va_ser_pc = predict(model_ser, newdata = x_scen)
-  }
-
-  # compute service sector as residual and level values
-  x_scen <- mutate(x_scen,
-                   va_agr = va_agr_pc * pop,
-                   va_ind = va_ind_pc * pop,
-                   va_ser = va_ser_pc * pop)
-
-  df <- rbind(x_hist, x_scen)
-} else {
     # check if there are fixed effects present for agriculture and predict accordingly
-  if(length(countries_agr) > 1){
-    x_scen[x_scen$spatial %in% countries_agr, "va_agr_share"] <-
-      predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
-  } else {
-    x_scen$va_agr_share = predict(model_agr, newdata = x_scen)
+    if(length(countries_agr) > 1){
+      x_scen[x_scen$spatial %in% countries_agr, "va_agr_share"] <-
+        predict(model_agr, newdata = filter(x_scen, spatial %in% countries_agr))
+    } else {
+      x_scen$va_agr_share = predict(model_agr, newdata = x_scen)
+    }
+
+    # check if there are fixed effects present for industry and predict accordingly
+    if(length(countries_ind) > 1){
+      x_scen[x_scen$spatial %in% countries_ind, "va_ind_share"] <-
+        predict(model_ind, newdata = filter(x_scen, spatial %in% countries_ind))
+    } else {
+      x_scen$va_ind_share = predict(model_ind, newdata = x_scen)
+    }
+
+    # check if there are fixed effects present for services and predict accordingly
+    if(length(countries_ser) > 1){
+      x_scen[x_scen$spatial %in% countries_ser, "va_ser_share"] <-
+        predict(model_ser, newdata = filter(x_scen, spatial %in% countries_ser))
+    } else {
+      x_scen$va_ser_share = predict(model_ser, newdata = x_scen)
+    }
+
+    # compute service sector as residual and level values
+    x_scen <- mutate(x_scen,
+                     va_agr = va_agr_share * gdp,
+                     va_ind = va_ind_share * gdp,
+                     va_ser = va_ser_share * gdp)
+
+    df <- rbind(x_hist, x_scen)
   }
-
-  # check if there are fixed effects present for industry and predict accordingly
-  if(length(countries_ind) > 1){
-    x_scen[x_scen$spatial %in% countries_ind, "va_ind_share"] <-
-      predict(model_ind, newdata = filter(x_scen, spatial %in% countries_ind))
-  } else {
-    x_scen$va_ind_share = predict(model_ind, newdata = x_scen)
-  }
-
-  # check if there are fixed effects present for services and predict accordingly
-  if(length(countries_ser) > 1){
-    x_scen[x_scen$spatial %in% countries_ser, "va_ser_share"] <-
-      predict(model_ser, newdata = filter(x_scen, spatial %in% countries_ser))
-  } else {
-    x_scen$va_ser_share = predict(model_ser, newdata = x_scen)
-  }
-
-  # compute service sector as residual and level values
-  x_scen <- mutate(x_scen,
-                   va_agr = va_agr_share * gdp,
-                   va_ind = va_ind_share * gdp,
-                   va_ser = va_ser_share * gdp)
-
-  df <- rbind(x_hist, x_scen)
-}
 
 
   # compute GDP(pC) resulting from projections and deviation
@@ -215,7 +215,7 @@ plot_country_results <- function(x, level, scen_hist = "history",
   start_country <- 1
 
   pdf_path <- file.path(run_settings$outdir, "figures", paste0("country_results_", level,
-                                                 ".pdf"))
+                                                               ".pdf"))
 
   pdf(pdf_path)
   for(i in seq(num_pages)){
@@ -305,39 +305,39 @@ plot_hist_fit_pred <- function(x, country, end_year){
     xdf_loop <- x[[run]]$data
     xdf_loop$run <- run
 
-  tmp_hist_loop <- filter(xdf_loop, spatial == country, scenario == "history")
-  tmp_scen_loop <- filter(xdf_loop, spatial == country, scenario != "history", temporal <= end_year)
+    tmp_hist_loop <- filter(xdf_loop, spatial == country, scenario == "history")
+    tmp_scen_loop <- filter(xdf_loop, spatial == country, scenario != "history", temporal <= end_year)
 
-  tmp_fit_loop <- filter(xdf_loop, spatial %in% country, scenario == "history",
-                    temporal <= end_year)
+    tmp_fit_loop <- filter(xdf_loop, spatial %in% country, scenario == "history",
+                           temporal <= end_year)
 
-  tmp_fit_loop$va_agr_pc_fit <- predict(x[[run]]$model_agr, newdata = tmp_fit_loop)
-  tmp_fit_loop$va_ind_pc_fit <- predict(x[[run]]$model_ind, newdata = tmp_fit_loop)
-  tmp_fit_loop$va_ser_pc_fit <- predict(x[[run]]$model_ser, newdata = tmp_fit_loop)
+    tmp_fit_loop$va_agr_pc_fit <- predict(x[[run]]$model_agr, newdata = tmp_fit_loop)
+    tmp_fit_loop$va_ind_pc_fit <- predict(x[[run]]$model_ind, newdata = tmp_fit_loop)
+    tmp_fit_loop$va_ser_pc_fit <- predict(x[[run]]$model_ser, newdata = tmp_fit_loop)
 
-  # combine results
-  xdf <- rbind(xdf, xdf_loop)
-  tmp_hist <- rbind(tmp_hist, tmp_hist_loop)
-  tmp_scen <- rbind(tmp_scen, tmp_scen_loop)
-  tmp_fit <- rbind(tmp_fit, tmp_fit_loop)
+    # combine results
+    xdf <- rbind(xdf, xdf_loop)
+    tmp_hist <- rbind(tmp_hist, tmp_hist_loop)
+    tmp_scen <- rbind(tmp_scen, tmp_scen_loop)
+    tmp_fit <- rbind(tmp_fit, tmp_fit_loop)
 
-  # model statistics
-  model_stats_loop <- data.frame("run" = rep(run, 3),
-                                 "sector" = c("agr", "ind", "ser"),
-                                 "equation" = NA,
-                                 "y_label" = max(tmp_scen_loop$va_ser_pc, na.rm = TRUE))
+    # model statistics
+    model_stats_loop <- data.frame("run" = rep(run, 3),
+                                   "sector" = c("agr", "ind", "ser"),
+                                   "equation" = NA,
+                                   "y_label" = max(tmp_scen_loop$va_ser_pc, na.rm = TRUE))
 
-  # equation
-  model_stats_loop[model_stats_loop$sector == "agr", "equation"] <-
-    deparse(x[[run]]$formula_agr, width.cutoff = 200)
-  model_stats_loop[model_stats_loop$sector == "ind", "equation"] <-
-    deparse(x[[run]]$formula_ind, width.cutoff = 200)
-  model_stats_loop[model_stats_loop$sector == "ser", "equation"] <-
-    deparse(x[[run]]$formula_ser, width.cutoff = 200)
+    # equation
+    model_stats_loop[model_stats_loop$sector == "agr", "equation"] <-
+      deparse(x[[run]]$formula_agr, width.cutoff = 200)
+    model_stats_loop[model_stats_loop$sector == "ind", "equation"] <-
+      deparse(x[[run]]$formula_ind, width.cutoff = 200)
+    model_stats_loop[model_stats_loop$sector == "ser", "equation"] <-
+      deparse(x[[run]]$formula_ser, width.cutoff = 200)
 
-  model_stats <- rbind(model_stats, model_stats_loop)
+    model_stats <- rbind(model_stats, model_stats_loop)
   }
-# browser()
+  # browser()
   p <- ggplot() +
     #agriculture
     geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_agr_pc), colour = "green") +
@@ -357,9 +357,9 @@ plot_hist_fit_pred <- function(x, country, end_year){
     theme_light() +
     annotate("text", x = 0, y = max(model_stats[model_stats$sector == "agr", "y_label"]),
              label = model_stats[model_stats$sector == "agr", "equation"], size = 1, hjust = 0) +
-        annotate("text", x = 0, y = 0.9*max(model_stats[model_stats$sector == "ind", "y_label"]),
+    annotate("text", x = 0, y = 0.9*max(model_stats[model_stats$sector == "ind", "y_label"]),
              label = model_stats[model_stats$sector == "ind", "equation"], size = 1, hjust = 0) +
-        annotate("text", x = 0, y = 0.8*max(model_stats[model_stats$sector == "ser", "y_label"]),
+    annotate("text", x = 0, y = 0.8*max(model_stats[model_stats$sector == "ser", "y_label"]),
              label = model_stats[model_stats$sector == "ser", "equation"], size = 1, hjust = 0) +
     facet_wrap(~ run) +
     ggtitle(paste(country, "until", end_year))
@@ -373,8 +373,8 @@ plot_hist_fit_pred <- function(x, country, end_year){
 # check to see if packages are installed. Install them if they are not, then
 # load them into the R session.
 ipak <- function(pkg){
-    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-    if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
-    sapply(pkg, require, character.only = TRUE)
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
 }
