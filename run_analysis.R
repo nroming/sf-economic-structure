@@ -11,10 +11,14 @@ start_time <- Sys.time()
 source("R/functions.R")
 
 # define needed packages
-packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", "openxlsx", "beepr", "zoo")
+packages <- c("reshape2", "ggplot2", "readr", "readxl", "countrycode", "dplyr", "openxlsx", "beepr", "zoo", "foreach", "doParallel")
 
 # check if needed packags are installed and do so, if not
 ipak(packages)
+
+# register parallel backend to use 4 processors
+cl <- makeCluster(4)
+registerDoParallel(cl)
 
 # load default settings
 source("R/settings.R")

@@ -22,9 +22,10 @@ for(run in runs){
 
 }
 
-for (c in g20){
-  try(p <- plot_hist_fit_pred(x  = result_all, country = c, end_year = 2020))
+microbenchmark(foreach (c =  1:length(g20), .packages = "ggplot2") %dopar% {
+  try(p <- plot_hist_fit_pred(x  = result_all, country = g20[c], end_year = 2020))
   try(ggsave(plot = p, filename = file.path("output", "comparison",
-                                            paste0("fit_", c, ".png")),
+                                            paste0("fit_", g20[c], ".png")),
              width = 18, height = 10, units = "cm"))
-}
+}, times = 3)
+
