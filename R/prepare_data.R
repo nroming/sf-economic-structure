@@ -65,8 +65,76 @@ if(!file.exists("output/common/df.rda")){
                pop_dens = pop / area,
                ca_pc = ca / pop,
                nx_pc = nx / pop,
+               nx_pc_share = nx_pc / gdp_pc,
                tax_pc = tax / pop
   )
+
+  # add scenario for net exports ----
+  # find last observed value of nx
+  df_nx <- select(df, scenario, spatial, temporal, nx_pc_share) %>%
+    group_by(spatial) %>%
+    filter(!is.na(nx_pc_share)) %>%
+    filter(temporal == max(temporal, na.rm = TRUE)) %>%
+    ungroup()
+
+  # preallocate dataframe for scenario
+  df_nx_scen <- data.frame()
+
+  # include the necessary information
+  for (ssp in c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")){
+      tmp1 <- mutate(df_nx, temporal = 2100,
+                       nx_pc_share = 0,
+                       scenario = ssp)
+
+      # create historic data point for each SSP for later grouping and
+      # interpolation
+      tmp2 <- mutate(df_nx, scenario = ssp)
+
+      tmp1 <- rbind(tmp1, tmp2)
+
+      df_nx_scen <- rbind(df_nx_scen, tmp1)
+
+      rm(tmp1, tmp2)
+  }
+
+  # interpolation of net exports
+  # include intervening years
+  years_iv <- expand.grid(list(temporal = 2005:2100,
+                               spatial = unique(df_nx_scen$spatial),
+                               scenario = c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")))
+
+  # find the actual year of the last historical observation for each country
+  years_hist_last <- select(df_nx, spatial, temporal) %>%
+    rename(last = temporal)
+
+  years_iv <- inner_join(years_iv, years_hist_last, by = "spatial") %>%
+    group_by(spatial) %>%
+    filter(temporal >= last) %>%
+    select(-last)
+
+  # join with actual data to get explicit gaps
+  df_nx_scen <- full_join(df_nx_scen, years_iv, by = c("scenario", "spatial", "temporal"))
+
+  # interpolation
+  df_nx_scen <- group_by(df_nx_scen, scenario, spatial) %>%
+    arrange(temporal) %>%
+    mutate(nx_pc_share = na.approx(nx_pc_share))
+
+  # limit it to SSP scenario data years
+  # get miminum year for scenario data
+  temp_min_scen <-filter(df, scenario != "history") %>% select(temporal) %>% min()
+
+  # remove data before that year
+  df_nx_scen <- filter(df_nx_scen, temporal >= temp_min_scen)
+
+  # rename column before joining since there is already data present
+  df_nx_scen <- rename(df_nx_scen, nx_pc_share_scen = nx_pc_share)
+
+  # and merge with main data
+  df <- full_join(df, df_nx_scen, by = c("scenario", "spatial", "temporal"))
+
+  # use interpolated data only of no historical data is available
+  df <- mutate(df, nx_pc_share = ifelse(is.na(nx_pc_share), nx_pc_share_scen, nx_pc_share))
 
   # calculate growth rates
   df <- group_by(df, scenario, spatial) %>%
@@ -111,7 +179,7 @@ if(!file.exists("output/common/df.rda")){
   units <- readRDS("output/common/units.rda")
 }
 
-# create some common plots ---
+# create some common plots ----
 if(!dir.exists("output/common/figures")){
   dir.create("output/common/figures", recursive = TRUE, showWarnings = FALSE)
 }
