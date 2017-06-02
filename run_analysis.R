@@ -22,11 +22,45 @@ source("R/settings.R")
 # prepare common data
 source("R/prepare_data.R")
 
+# base ----
+settings <- settings_default
+
+# modify experiment name
+settings$exp_name <- "base"
+
+# modify model complexity
+settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
+                         "pop_dens", "urb_share", "temporal")
+
+settings$plotting <- TRUE
+
+# prepare run
+settings <- prepare_run(settings)
+
+source("R/analysis.R")
+
+# convergence measure -----
+settings <- settings_default
+
+# modify experiment name
+settings$exp_name <- "conv"
+
+# modify model complexity
+settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
+                         "pop_dens", "urb_share", "temporal", "ratio_gdp_pc2glob")
+
+settings$plotting <- TRUE
+
+# prepare run
+settings <- prepare_run(settings)
+
+source("R/analysis.R")
+
 # population weights ----
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "weights_pop"
+settings$exp_name <- "conv_pop"
 
 # modify model complexity
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
@@ -35,7 +69,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
 # use weighed regression
 settings$regression_weights <- "pop"
 
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -47,14 +81,14 @@ source("R/analysis.R")
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "weights_pop_nx"
+settings$exp_name <- "conv_pop_nx"
 
 # modify model complexity
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "nx_pc_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # use weighed regression
 settings$regression_weights <- "pop"
@@ -69,14 +103,14 @@ source("R/analysis.R")
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "weights_gdp"
+settings$exp_name <- "conv_gdp"
 
 # modify model complexity
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # use weighed regression
 settings$regression_weights <- "gdp"
@@ -91,14 +125,14 @@ source("R/analysis.R")
 settings <- settings_default
 
 # modify experiment name
-settings$exp_name <- "weights_gdp_nx"
+settings$exp_name <- "conv_gdp_nx"
 
 # modify model complexity
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "nx_pc_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- FALSE
+settings$plotting <- TRUE
 
 # use weighed regression
 settings$regression_weights <- "gdp"
