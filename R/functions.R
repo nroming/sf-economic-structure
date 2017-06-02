@@ -271,7 +271,7 @@ prepare_run <- function(settings_list){
 
   # create directory structure
   # output folder for the specific run
-  outdir <- file.path("output", settings_list$exp_name)
+  outdir <- file.path("output/runs", settings_list$exp_name)
 
   if(!dir.exists(file.path(outdir, "figures"))){
     dir.create(file.path(outdir, "figures"), recursive = TRUE, showWarnings = FALSE)

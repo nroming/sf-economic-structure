@@ -4,17 +4,13 @@ if(!exists("g20")) source("R/settings.R")
 dir.create(file.path("output", "comparison"))
 
 # find runs in ouput directory ----
-runs <- dir("output")
-
-# exclude some directories
-runs <- runs[-grepl("common", runs)]
-runs <- runs[-grepl("comparison", runs)]
+runs <- dir("output/runs")
 
 result_all <- list()
 
 # extract necessary information ----
 for(run in runs){
-  path_to_run <- file.path("output", run)
+  path_to_run <- file.path("output/runs", run)
 
   # load result
   run_result <- readRDS(file.path(path_to_run, "data", "result_list.rda"))
