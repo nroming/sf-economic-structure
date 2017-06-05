@@ -22,25 +22,6 @@ prestimation <- function(x = df, ref_country = settings$country_ref,
   # for prediction, to these
   x_hist <- filter(x_hist, !is.na(gdp), !is.na(pop))
 
-  # attach information about country area
-  country_area <- filter(x_hist, temporal == 2010) %>%
-    select(spatial, area) %>%
-    distinct() %>%
-    na.omit()
-
-  # drop old area column (only NAs)
-  x_scen <- select(x_scen, -area)
-
-  # attach country area information
-  x_scen <- inner_join(x_scen, country_area, by = c("spatial"))
-
-  # calculate population density
-  x_scen <- mutate(x_scen, pop_dens = pop/area)
-
-  # limit scenario data to countries that are present in the historic data
-  x_scen <- filter(x_scen, !(spatial %in% setequal(unique(x_scen$spatial),
-                                                   unique(x_hist$spatial))))
-
   # make sure all the data is complete since otherwise the weights will not work
   # x_hist <- x_hist[complete.cases(x_hist[c(all.vars(formula_agr), get(w))]), ]
 

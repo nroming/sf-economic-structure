@@ -30,9 +30,11 @@ if(!file.exists("output/common/df.rda")){
     mutate(value = value/100,
            unit = "1")
 
-  df <- rbind(wdi, ssp_gdp, ssp_pop) # combine dataframe for renaming
+  ssp_urb <- interpolate_missing_years(ssp_urb)
 
-  rm(wdi, ssp_pop, ssp_gdp) # clean up
+  df <- rbind(wdi, ssp_gdp, ssp_pop, ssp_urb) # combine dataframe for renaming
+
+  rm(wdi, ssp_pop, ssp_gdp, ssp_urb) # clean up
 
   # rename variables
   for (var in vars){
@@ -54,6 +56,29 @@ if(!file.exists("output/common/df.rda")){
 
   # compute taxes (on value added from industry and services)
   df <- mutate(df, tax = tax_share * (va_ind + va_ser))
+
+  # split up data into separate dataframes for historic and scenario data
+  df_hist <- filter(df, scenario == "history")
+  df_scen <- filter(df, scenario != "history")
+
+  # attach information about country area
+  country_area <- filter(df_hist, temporal == 2010) %>%
+    select(spatial, area) %>%
+    distinct() %>%
+    na.omit()
+
+  # drop old area column (only NAs)
+  df_scen <- select(df_scen, -area)
+
+  # attach country area information
+  df_scen <- inner_join(df_scen, country_area, by = c("spatial"))
+
+  # limit scenario data to countries that are present in the historic data
+  df_scen <- filter(df_scen, !(spatial %in% setequal(unique(df_scen$spatial),
+                                                   unique(df_hist$spatial))))
+
+  # recombine data
+  df <- rbind(df_hist, df_scen)
 
   # compute per capita values
   df <- mutate(df, gdp_pc = gdp / pop,
