@@ -192,103 +192,103 @@ ggplot() +
 ggsave(filename = file.path(settings$outdir, "figures/regions_sectoral_shares.png"), width = 32, height = 18,
        units = "cm")
 
-# # historical FE intensities by sector ----
-# countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "CHN")
-#
-# iea <- filter(idata_n, source_id == "IEA_2014",
-#               spatial %in% countries,
-#               # temporal <= 2012,
-#               temporal >= 1990,
-#               variable %in% paste("Final Energy",
-#                                    rep(c("Agriculture", "Industry", "Services"), 3),
-#                                    rep(c("Solids", "Liquids", "Gases", "Heat", "Electricity"), 3), sep = "|"))
-#
-# iea <- group_by(iea, source_id, model, scenario, spatial, temporal, variable, unit) %>%
-#   summarise(value = sum(value, na.rm = TRUE))
-#
-# iea$variable <- gsub("Final Energy|", "", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Agriculture|", "agr_", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Industry|", "ind_", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Services|", "ser_", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Solids", "solid", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Liquids", "liquid", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Gases", "gas", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Heat", "heat", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("Electricity", "elec", iea$variable, fixed = TRUE)
-#
-# iea <- dcast(iea, scenario + spatial + temporal ~ variable)
-#
-# df_hist <- filter(df, scenario == "history")
-#
-# tmp <- filter(df_hist, spatial %in% countries) %>%
-#   select(scenario, spatial, temporal, va_ind, va_agr, va_ser)
-#
-# iea <- inner_join(iea, tmp)
-#
-# iea <- mutate(iea, fei_agr_elec = agr_elec/va_agr,
-#               fei_agr_solid = agr_solid/va_agr,
-#               fei_agr_liquid = agr_liquid/va_agr,
-#               fei_agr_gas = agr_gas/va_agr,
-#               fei_agr_heat = agr_heat/va_agr,
-#               fei_agr_tot = (agr_elec + agr_solid + agr_liquid + agr_gas + agr_heat)/va_agr,
-#
-#               fei_ind_elec = ind_elec/va_ind,
-#               fei_ind_solid = ind_solid/va_ind,
-#               fei_ind_liquid = ind_liquid/va_ind,
-#               fei_ind_gas = ind_gas/va_ind,
-#               fei_ind_heat = ind_heat/va_ind,
-#               fei_ind_tot = (ind_elec + ind_solid + ind_liquid + ind_gas + ind_heat)/va_ind,
-#
-#
-#               fei_ser_elec = ser_elec/va_ser,
-#               fei_ser_solid = ser_solid/va_ser,
-#               fei_ser_liquid = ser_liquid/va_ser,
-#               fei_ser_gas = ser_gas/va_ser,
-#               fei_ser_heat = ser_heat/va_ser,
-#               fei_ser_tot = (ser_elec + ser_solid + ser_liquid + ser_gas + ser_heat)/va_ser
-# )
-#
-# iea <- select(iea, spatial, temporal, fei_agr_elec:fei_ser_tot)
-#
-# iea <- melt(iea, id.vars = c("spatial", "temporal"))
-#
-# iea <- filter(iea, !is.na(value))
-# iea <- filter(iea, value != 0)
-#
-# iea$variable <- gsub("fei_", "", iea$variable, fixed = TRUE)
-#
-# iea$sector <- NA
-# iea[grepl("agr", iea$variable), "sector"] <- "Agriculture"
-# iea[grepl("ind", iea$variable), "sector"] <- "Industry"
-# iea[grepl("ser", iea$variable), "sector"] <- "Services"
-#
-# iea$variable <- gsub("agr_", "", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("ind_", "", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("ser_", "", iea$variable, fixed = TRUE)
-#
-# iea$variable <- gsub("elec", "Electricity", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("gas", "Gases", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("heat", "Heat", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("liquid", "Liquids", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("solid", "Solids", iea$variable, fixed = TRUE)
-# iea$variable <- gsub("tot", "Total", iea$variable, fixed = TRUE)
-#
-# iea <- mutate(iea, value = value * 1e6)
-#
-# iea_tot <- filter(iea, variable == "Total")
-# iea <- filter(iea, variable != "Total")
-#
-# ggplot() +
-#   geom_line(data = iea, aes(x = temporal, y = value, group = variable,
-#                             colour = variable), size = 1) +
-#   geom_line(data = iea_tot, aes(x = temporal, y = value), size = 1, colour = "black") +
-#   theme_bw(base_size = 9) +
-#   scale_colour_brewer(type = "qual", palette = 2) +
-#   theme(legend.title=element_blank(), legend.position = "bottom") +
-#   xlab("") +
-#   ylab("GJ/bn USD2005") +
-#   facet_grid(spatial ~ sector, scales = "free")
-# ggsave(file.path(settings$outdir, "figures", "FEI.png"), width = 18, height = 27, units = "cm")
+# historical FE intensities by sector ----
+countries <- c("GBR", "FRA", "USA", "ITA", "ESP", "CHN")
+
+iea <- filter(idata_n, source_id == "IEA_2014",
+              spatial %in% countries,
+              # temporal <= 2012,
+              temporal >= 1990,
+              variable %in% paste("Final Energy",
+                                   rep(c("Agriculture", "Industry", "Services"), 3),
+                                   rep(c("Solids", "Liquids", "Gases", "Heat", "Electricity"), 3), sep = "|"))
+
+iea <- group_by(iea, source_id, model, scenario, spatial, temporal, variable, unit) %>%
+  summarise(value = sum(value, na.rm = TRUE))
+
+iea$variable <- gsub("Final Energy|", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Agriculture|", "agr_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Industry|", "ind_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Services|", "ser_", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Solids", "solid", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Liquids", "liquid", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Gases", "gas", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Heat", "heat", iea$variable, fixed = TRUE)
+iea$variable <- gsub("Electricity", "elec", iea$variable, fixed = TRUE)
+
+iea <- dcast(iea, scenario + spatial + temporal ~ variable)
+
+df_hist <- filter(df, scenario == "history")
+
+tmp <- filter(df_hist, spatial %in% countries) %>%
+  select(scenario, spatial, temporal, va_ind, va_agr, va_ser)
+
+iea <- inner_join(iea, tmp)
+
+iea <- mutate(iea, fei_agr_elec = agr_elec/va_agr,
+              fei_agr_solid = agr_solid/va_agr,
+              fei_agr_liquid = agr_liquid/va_agr,
+              fei_agr_gas = agr_gas/va_agr,
+              fei_agr_heat = agr_heat/va_agr,
+              fei_agr_tot = (agr_elec + agr_solid + agr_liquid + agr_gas + agr_heat)/va_agr,
+
+              fei_ind_elec = ind_elec/va_ind,
+              fei_ind_solid = ind_solid/va_ind,
+              fei_ind_liquid = ind_liquid/va_ind,
+              fei_ind_gas = ind_gas/va_ind,
+              fei_ind_heat = ind_heat/va_ind,
+              fei_ind_tot = (ind_elec + ind_solid + ind_liquid + ind_gas + ind_heat)/va_ind,
+
+
+              fei_ser_elec = ser_elec/va_ser,
+              fei_ser_solid = ser_solid/va_ser,
+              fei_ser_liquid = ser_liquid/va_ser,
+              fei_ser_gas = ser_gas/va_ser,
+              fei_ser_heat = ser_heat/va_ser,
+              fei_ser_tot = (ser_elec + ser_solid + ser_liquid + ser_gas + ser_heat)/va_ser
+)
+
+iea <- select(iea, spatial, temporal, fei_agr_elec:fei_ser_tot)
+
+iea <- melt(iea, id.vars = c("spatial", "temporal"))
+
+iea <- filter(iea, !is.na(value))
+iea <- filter(iea, value != 0)
+
+iea$variable <- gsub("fei_", "", iea$variable, fixed = TRUE)
+
+iea$sector <- NA
+iea[grepl("agr", iea$variable), "sector"] <- "Agriculture"
+iea[grepl("ind", iea$variable), "sector"] <- "Industry"
+iea[grepl("ser", iea$variable), "sector"] <- "Services"
+
+iea$variable <- gsub("agr_", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("ind_", "", iea$variable, fixed = TRUE)
+iea$variable <- gsub("ser_", "", iea$variable, fixed = TRUE)
+
+iea$variable <- gsub("elec", "Electricity", iea$variable, fixed = TRUE)
+iea$variable <- gsub("gas", "Gases", iea$variable, fixed = TRUE)
+iea$variable <- gsub("heat", "Heat", iea$variable, fixed = TRUE)
+iea$variable <- gsub("liquid", "Liquids", iea$variable, fixed = TRUE)
+iea$variable <- gsub("solid", "Solids", iea$variable, fixed = TRUE)
+iea$variable <- gsub("tot", "Total", iea$variable, fixed = TRUE)
+
+iea <- mutate(iea, value = value * 1e6)
+
+iea_tot <- filter(iea, variable == "Total")
+iea <- filter(iea, variable != "Total")
+
+ggplot() +
+  geom_line(data = iea, aes(x = temporal, y = value, group = variable,
+                            colour = variable), size = 1) +
+  geom_line(data = iea_tot, aes(x = temporal, y = value), size = 1, colour = "black") +
+  theme_bw(base_size = 9) +
+  scale_colour_brewer(type = "qual", palette = 2) +
+  theme(legend.title=element_blank(), legend.position = "bottom") +
+  xlab("") +
+  ylab("GJ/bn USD2005") +
+  facet_grid(spatial ~ sector, scales = "free")
+ggsave(file.path(settings$outdir, "figures", "FEI.png"), width = 18, height = 27, units = "cm")
 
 # AR5 final energy demand pathways ----
 tmp <- filter(idata_n, source_id == "AR5",

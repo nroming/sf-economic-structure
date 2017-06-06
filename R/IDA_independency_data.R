@@ -57,177 +57,177 @@ WDI_2015$source_id <- "WDI_2015"
 
 idata_n <- rbind(idata_n, WDI_2015)
 
-## IEA energy data ----
-# ktoe2EJ <- 0.000041868
-# cat("Reading IEA energy data (2014 edition).")
-# iea <- read_csv(unz("data/IEA_2014.zip", "IEA_2014/IEA2014.csv"), na = c("..", "x"))
-#
-# iea$TIME <- gsub("2013E", "2013", iea$TIME)
-# iea$TIME <- as.integer(iea$TIME)
-#
-# map_reg <- read_excel("data/mappings.xlsx", sheet = "regions")
-#
-# # primary energy
-# # some PE types need aggregation
-# coal <- c("HARDCOAL", "BROWN", "ANTCOAL", "COKCOAL", "BITCOAL", "SUBCOAL",
-#           "LIGNITE", "PATFUEL", "OVENCOKE", "GASCOKE", "COALTAR", "BKB",
-#           "GASWKSGS", "COKEOVGS", "BLFURGS", "OGASES", "PEAT", "PEATPROD")
-# oil <- c("CRNGFEED", "CRUDEOIL", "NGL", "REFFEEDS", "ADDITIVE", "NONCRUDE")
-# oil_products <- c("REFINGAS", "ETHANE", "LPG", "NONBIOGASO", "AVGAS", "JETGAS",
-#          "NONBIOJETK", "OTHKERO", "NONBIODIES", "RESFUEL", "NAPHTA", "WHITESP",
-#          "LUBRIC", "BITUMEN", "PARWAX", "PETCOKE", "ONONSPEC")
-# renewables <- c("HYDRO", "GEOTHERM", "SOLARPV", "SOLARTH", "TIDE", "WIND")
-# biomass <- c("MUNWASTER", "PRIMSBIO", "BIOGASES", "BIOGASOL", "BIODIESEL",
-#              "OBIOLIQ", "RENEWNS", "CHARCOAL")
-#
-# pe <- filter(iea, FLOW == "TPES", PRODUCT %in% c(coal, oil, oil_products, "NATGAS",
-#                                                   "NUCLEAR", renewables,
-#                                                   biomass))
-#
-# # add variable column which can also be used for aggregation
-# pe$variable <- NA
-# pe[pe$PRODUCT %in% coal, "variable"] <- "Primary Energy|Coal"
-# pe[pe$PRODUCT %in% c(oil, oil_products), "variable"] <- "Primary Energy|Oil"
-# pe[pe$PRODUCT == "NATGAS", "variable"] <- "Primary Energy|Gas"
-# pe[pe$PRODUCT == "NUCLEAR", "variable"] <- "Primary Energy|Nuclear"
-# pe[pe$PRODUCT %in% renewables, "variable"] <- "Primary Energy|Non-Biomass Renewables"
-# pe[pe$PRODUCT %in% biomass, "variable"] <- "Primary Energy|Biomass"
-#
-# pe <- group_by(pe, COUNTRY, TIME, variable) %>%
-#         summarise(value = sum(ktoe, na.rm = TRUE)) %>% ungroup() %>%
-#         mutate(value = value * ktoe2EJ, unit = "EJ/yr", source_id = "IEA_2014",
-#                model = "IEA", scenario = "history") %>%
-#         rename(temporal = TIME, IEA_country = COUNTRY)
-#
-# # special treatment of nuclear, which is contained in the data with its heat content
-# pe[pe$variable == "Primary Energy|Nuclear", "value"] <- pe[pe$variable == "Primary Energy|Nuclear", "value"] / 3
-#
-# pe <- inner_join(pe, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
-#
-# idata_n <- rbind(idata_n, pe)
-#
-# # final energy
-# fe <- filter(iea, FLOW == "TFC", PRODUCT == "TOTAL") %>%
-#         mutate(variable = "Final Energy|Total",
-#                 ktoe = ktoe * ktoe2EJ,
-#                 unit = "EJ/yr",
-#                 model = "IEA",
-#                 scenario = "history",
-#                 source_id = "IEA_2014") %>%
-#         select(-PRODUCT, -FLOW) %>%
-#         rename(value = ktoe, temporal = TIME, IEA_country = COUNTRY)
-#
-# fe <- inner_join(fe, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
-#
-# idata_n <- rbind(idata_n, fe)
-#
-# # coal used for electricity
-# # no autoproducers (AUTOELEC, AUTOCHP)
-# coal_elec <- filter(iea, FLOW %in% c("MAINELEC",  "MAINCHP"), PRODUCT %in% coal)
-#
-# # values are all negative
-# coal_elec <- group_by(coal_elec, COUNTRY, TIME) %>%
-#                 summarise( value = sum(ktoe, na.rm = TRUE)) %>%
-#                 mutate(value = value  * -ktoe2EJ,
-#                        variable = "Primary Energy|Coal|w/o CCS|Electricity",
-#                        unit = "EJ/yr",
-#                        model = "IEA",
-#                        scenario = "history",
-#                        source_id = "IEA_2014") %>%
-#                 rename(temporal = TIME, IEA_country = COUNTRY) %>% ungroup()
-#
-# coal_elec <- inner_join(coal_elec, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
-#
-# # attach to data
-# idata_n <- rbind(idata_n, coal_elec)
-#
-# # including autoproducers (AUTOELEC, AUTOCHP)
-# coal_elec1 <- filter(iea, FLOW %in% c("MAINELEC",  "MAINCHP", "AUTOELEC", "AUTOCHP"), PRODUCT %in% coal)
-#
-# # values are all negative
-# coal_elec1 <- group_by(coal_elec1, COUNTRY, TIME) %>%
-#                 summarise( value = sum(ktoe, na.rm = TRUE)) %>%
-#                 mutate(value = value  * -ktoe2EJ,
-#                        variable = "Primary Energy|Coal|w/o CCS|Electricity_1",
-#                        unit = "EJ/yr",
-#                        model = "IEA",
-#                        scenario = "history",
-#                        source_id = "IEA_2014") %>%
-#                 rename(temporal = TIME, IEA_country = COUNTRY) %>% ungroup()
-#
-# coal_elec1 <- inner_join(coal_elec1, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
-#
-# # attach to data
-# idata_n <- rbind(idata_n, coal_elec1)
-#
-# # final energy aggregation to the usual classes
-# # this mapping is taken from Antoine Levesque's code for PIK's energy demand
-# # generator (EDGE)
-# iea_liquid = c("CRUDEOIL", "NGL", "CRNGFEED",
-#                "BIODIESEL", "NONBIODIES", "OTHKERO",
-#                "RESFUEL", "AVGAS", "JETGAS",
-#                "NONBIOJETK", "REFINGAS",
-#                "PARWAX", "ONONSPEC", "WHITESP", "NAPHTHA",
-#                "BITUMEN", "LUBRIC", "NONBIOGASO",
-#                "BIOGASOL", "OBIOLIQ", "COALTAR","REFFEEDS", "NONCRUDE",
-#                "LPG", "ADDITIVE")
-# iea_heat = c("HEAT", "GEOTHERM", "SOLARTH")
-# iea_gas = c("NATGAS", "GASWKSGS", "COKEOVGS","ETHANE",
-#             "BLFURGS", "OGASES", "BIOGASES")
-# iea_solid = c("HARDCOAL", "BROWN", "PATFUEL",
-#               "MUNWASTER", "MUNWASTEN", "INDWASTE",
-#               "RENEWNS", "BKB", "ANTCOAL", "COKCOAL",
-#               "BITCOAL", "SUBCOAL", "LIGNITE","PETCOKE",
-#               "OVENCOKE", "PEAT", "PEATPROD",
-#               "PRIMSBIO", "CHARCOAL", "OILSHALE",
-#               "GASCOKE")
-# iea_elec = c("ELECTR")
-#
-# iea_agriculture <- c("AGRICULT", "FISHING")
-# iea_industry <- c("TOTIND")
-# iea_services <- c("COMMPUB")
-#
-# iea_fe_by_sector <- filter(iea, FLOW %in% c(iea_agriculture, iea_industry,
-#                                             iea_services),
-#                            PRODUCT %in% c(iea_solid, iea_liquid, iea_gas,
-#                                           iea_heat, iea_elec))
-#
-# # merge subsectors
-# iea_fe_by_sector <- mutate(iea_fe_by_sector,
-#                            FLOW = gsub("FISHING", "AGRICULT", FLOW))
-#
-# # rename sectors
-# iea_fe_by_sector[iea_fe_by_sector$FLOW == "AGRICULT", "FLOW"] <- "Agriculture"
-# iea_fe_by_sector[iea_fe_by_sector$FLOW == "TOTIND", "FLOW"] <- "Industry"
-# iea_fe_by_sector[iea_fe_by_sector$FLOW == "COMMPUB", "FLOW"] <- "Services"
-#
-#
-# # replace the FE subtypes
-# iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_solid, "PRODUCT"] <- "Solids"
-# iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_liquid, "PRODUCT"] <- "Liquids"
-# iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_gas, "PRODUCT"] <- "Gases"
-# iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_heat, "PRODUCT"] <- "Heat"
-# iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_elec, "PRODUCT"] <- "Electricity"
-#
-# # aggregation of FE types by sector, country, year
-# iea_fe_by_sector <- group_by(iea_fe_by_sector, COUNTRY, TIME, FLOW, PRODUCT) %>%
-#   summarise(value = sum(ktoe, na.rm = TRUE) * ktoe2EJ) %>%
-#   rename(temporal = TIME) %>%
-#   mutate(variable = paste("Final Energy", FLOW, PRODUCT, sep = "|"),
-#          unit = "EJ/yr",
-#          source_id = "IEA_2014",
-#          model = "IEA",
-#          scenario = "history") %>%
-#   ungroup()
-#
-# iea_fe_by_sector <- mutate(iea_fe_by_sector,
-#                            spatial = countrycode(COUNTRY, "country.name", "iso3c")) %>%
-#   filter(!is.na(spatial)) %>%
-#   select(-COUNTRY, -FLOW, -PRODUCT)
-#
-# idata_n <- rbind(idata_n, iea_fe_by_sector)
-#
-# rm(iea, iea_fe_by_sector)
+# IEA energy data ----
+ktoe2EJ <- 0.000041868
+cat("Reading IEA energy data (2014 edition).")
+iea <- read_csv(unz("data/IEA_2014.zip", "IEA_2014/IEA2014.csv"), na = c("..", "x"))
+
+iea$TIME <- gsub("2013E", "2013", iea$TIME)
+iea$TIME <- as.integer(iea$TIME)
+
+map_reg <- read_excel("data/mappings.xlsx", sheet = "regions")
+
+# primary energy
+# some PE types need aggregation
+coal <- c("HARDCOAL", "BROWN", "ANTCOAL", "COKCOAL", "BITCOAL", "SUBCOAL",
+          "LIGNITE", "PATFUEL", "OVENCOKE", "GASCOKE", "COALTAR", "BKB",
+          "GASWKSGS", "COKEOVGS", "BLFURGS", "OGASES", "PEAT", "PEATPROD")
+oil <- c("CRNGFEED", "CRUDEOIL", "NGL", "REFFEEDS", "ADDITIVE", "NONCRUDE")
+oil_products <- c("REFINGAS", "ETHANE", "LPG", "NONBIOGASO", "AVGAS", "JETGAS",
+         "NONBIOJETK", "OTHKERO", "NONBIODIES", "RESFUEL", "NAPHTA", "WHITESP",
+         "LUBRIC", "BITUMEN", "PARWAX", "PETCOKE", "ONONSPEC")
+renewables <- c("HYDRO", "GEOTHERM", "SOLARPV", "SOLARTH", "TIDE", "WIND")
+biomass <- c("MUNWASTER", "PRIMSBIO", "BIOGASES", "BIOGASOL", "BIODIESEL",
+             "OBIOLIQ", "RENEWNS", "CHARCOAL")
+
+pe <- filter(iea, FLOW == "TPES", PRODUCT %in% c(coal, oil, oil_products, "NATGAS",
+                                                  "NUCLEAR", renewables,
+                                                  biomass))
+
+# add variable column which can also be used for aggregation
+pe$variable <- NA
+pe[pe$PRODUCT %in% coal, "variable"] <- "Primary Energy|Coal"
+pe[pe$PRODUCT %in% c(oil, oil_products), "variable"] <- "Primary Energy|Oil"
+pe[pe$PRODUCT == "NATGAS", "variable"] <- "Primary Energy|Gas"
+pe[pe$PRODUCT == "NUCLEAR", "variable"] <- "Primary Energy|Nuclear"
+pe[pe$PRODUCT %in% renewables, "variable"] <- "Primary Energy|Non-Biomass Renewables"
+pe[pe$PRODUCT %in% biomass, "variable"] <- "Primary Energy|Biomass"
+
+pe <- group_by(pe, COUNTRY, TIME, variable) %>%
+        summarise(value = sum(ktoe, na.rm = TRUE)) %>% ungroup() %>%
+        mutate(value = value * ktoe2EJ, unit = "EJ/yr", source_id = "IEA_2014",
+               model = "IEA", scenario = "history") %>%
+        rename(temporal = TIME, IEA_country = COUNTRY)
+
+# special treatment of nuclear, which is contained in the data with its heat content
+pe[pe$variable == "Primary Energy|Nuclear", "value"] <- pe[pe$variable == "Primary Energy|Nuclear", "value"] / 3
+
+pe <- inner_join(pe, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
+
+idata_n <- rbind(idata_n, pe)
+
+# final energy
+fe <- filter(iea, FLOW == "TFC", PRODUCT == "TOTAL") %>%
+        mutate(variable = "Final Energy|Total",
+                ktoe = ktoe * ktoe2EJ,
+                unit = "EJ/yr",
+                model = "IEA",
+                scenario = "history",
+                source_id = "IEA_2014") %>%
+        select(-PRODUCT, -FLOW) %>%
+        rename(value = ktoe, temporal = TIME, IEA_country = COUNTRY)
+
+fe <- inner_join(fe, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
+
+idata_n <- rbind(idata_n, fe)
+
+# coal used for electricity
+# no autoproducers (AUTOELEC, AUTOCHP)
+coal_elec <- filter(iea, FLOW %in% c("MAINELEC",  "MAINCHP"), PRODUCT %in% coal)
+
+# values are all negative
+coal_elec <- group_by(coal_elec, COUNTRY, TIME) %>%
+                summarise( value = sum(ktoe, na.rm = TRUE)) %>%
+                mutate(value = value  * -ktoe2EJ,
+                       variable = "Primary Energy|Coal|w/o CCS|Electricity",
+                       unit = "EJ/yr",
+                       model = "IEA",
+                       scenario = "history",
+                       source_id = "IEA_2014") %>%
+                rename(temporal = TIME, IEA_country = COUNTRY) %>% ungroup()
+
+coal_elec <- inner_join(coal_elec, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
+
+# attach to data
+idata_n <- rbind(idata_n, coal_elec)
+
+# including autoproducers (AUTOELEC, AUTOCHP)
+coal_elec1 <- filter(iea, FLOW %in% c("MAINELEC",  "MAINCHP", "AUTOELEC", "AUTOCHP"), PRODUCT %in% coal)
+
+# values are all negative
+coal_elec1 <- group_by(coal_elec1, COUNTRY, TIME) %>%
+                summarise( value = sum(ktoe, na.rm = TRUE)) %>%
+                mutate(value = value  * -ktoe2EJ,
+                       variable = "Primary Energy|Coal|w/o CCS|Electricity_1",
+                       unit = "EJ/yr",
+                       model = "IEA",
+                       scenario = "history",
+                       source_id = "IEA_2014") %>%
+                rename(temporal = TIME, IEA_country = COUNTRY) %>% ungroup()
+
+coal_elec1 <- inner_join(coal_elec1, select(map_reg, IDA, IEA_country)) %>% select(-IEA_country) %>% rename(spatial = IDA)
+
+# attach to data
+idata_n <- rbind(idata_n, coal_elec1)
+
+# final energy aggregation to the usual classes
+# this mapping is taken from Antoine Levesque's code for PIK's energy demand
+# generator (EDGE)
+iea_liquid = c("CRUDEOIL", "NGL", "CRNGFEED",
+               "BIODIESEL", "NONBIODIES", "OTHKERO",
+               "RESFUEL", "AVGAS", "JETGAS",
+               "NONBIOJETK", "REFINGAS",
+               "PARWAX", "ONONSPEC", "WHITESP", "NAPHTHA",
+               "BITUMEN", "LUBRIC", "NONBIOGASO",
+               "BIOGASOL", "OBIOLIQ", "COALTAR","REFFEEDS", "NONCRUDE",
+               "LPG", "ADDITIVE")
+iea_heat = c("HEAT", "GEOTHERM", "SOLARTH")
+iea_gas = c("NATGAS", "GASWKSGS", "COKEOVGS","ETHANE",
+            "BLFURGS", "OGASES", "BIOGASES")
+iea_solid = c("HARDCOAL", "BROWN", "PATFUEL",
+              "MUNWASTER", "MUNWASTEN", "INDWASTE",
+              "RENEWNS", "BKB", "ANTCOAL", "COKCOAL",
+              "BITCOAL", "SUBCOAL", "LIGNITE","PETCOKE",
+              "OVENCOKE", "PEAT", "PEATPROD",
+              "PRIMSBIO", "CHARCOAL", "OILSHALE",
+              "GASCOKE")
+iea_elec = c("ELECTR")
+
+iea_agriculture <- c("AGRICULT", "FISHING")
+iea_industry <- c("TOTIND")
+iea_services <- c("COMMPUB")
+
+iea_fe_by_sector <- filter(iea, FLOW %in% c(iea_agriculture, iea_industry,
+                                            iea_services),
+                           PRODUCT %in% c(iea_solid, iea_liquid, iea_gas,
+                                          iea_heat, iea_elec))
+
+# merge subsectors
+iea_fe_by_sector <- mutate(iea_fe_by_sector,
+                           FLOW = gsub("FISHING", "AGRICULT", FLOW))
+
+# rename sectors
+iea_fe_by_sector[iea_fe_by_sector$FLOW == "AGRICULT", "FLOW"] <- "Agriculture"
+iea_fe_by_sector[iea_fe_by_sector$FLOW == "TOTIND", "FLOW"] <- "Industry"
+iea_fe_by_sector[iea_fe_by_sector$FLOW == "COMMPUB", "FLOW"] <- "Services"
+
+
+# replace the FE subtypes
+iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_solid, "PRODUCT"] <- "Solids"
+iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_liquid, "PRODUCT"] <- "Liquids"
+iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_gas, "PRODUCT"] <- "Gases"
+iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_heat, "PRODUCT"] <- "Heat"
+iea_fe_by_sector[iea_fe_by_sector$PRODUCT %in% iea_elec, "PRODUCT"] <- "Electricity"
+
+# aggregation of FE types by sector, country, year
+iea_fe_by_sector <- group_by(iea_fe_by_sector, COUNTRY, TIME, FLOW, PRODUCT) %>%
+  summarise(value = sum(ktoe, na.rm = TRUE) * ktoe2EJ) %>%
+  rename(temporal = TIME) %>%
+  mutate(variable = paste("Final Energy", FLOW, PRODUCT, sep = "|"),
+         unit = "EJ/yr",
+         source_id = "IEA_2014",
+         model = "IEA",
+         scenario = "history") %>%
+  ungroup()
+
+iea_fe_by_sector <- mutate(iea_fe_by_sector,
+                           spatial = countrycode(COUNTRY, "country.name", "iso3c")) %>%
+  filter(!is.na(spatial)) %>%
+  select(-COUNTRY, -FLOW, -PRODUCT)
+
+idata_n <- rbind(idata_n, iea_fe_by_sector)
+
+rm(iea, iea_fe_by_sector)
 
 # SSP scenario database -----
 cat("Reading in SSP database.\n")
