@@ -30,7 +30,7 @@ if(!file.exists("output/common/df.rda")){
     mutate(value = value/100,
            unit = "1")
 
-  ssp_urb <- interpolate_missing_years(ssp_urb)
+  ssp_urb <- interpolate_missing_years(ssp_urb, stepwidth = 5)
 
   df <- rbind(wdi, ssp_gdp, ssp_pop, ssp_urb) # combine dataframe for renaming
 
@@ -124,7 +124,7 @@ if(!file.exists("output/common/df.rda")){
 
   # interpolation of net exports
   # include intervening years
-  years_iv <- expand.grid(list(temporal = 2005:2100,
+  years_iv <- expand.grid(list(temporal = seq(2005,2100, 5),
                                spatial = unique(df_nx_scen$spatial),
                                scenario = c("SSP1", "SSP2", "SSP3", "SSP4", "SSP5")))
 
@@ -163,14 +163,10 @@ if(!file.exists("output/common/df.rda")){
 
   # calculate growth rates
   df <- group_by(df, scenario, spatial) %>%
-    mutate(va_agr_pc_gr = lag(va_agr_pc, n = 0, order_by = temporal) /
-             lag(va_agr_pc, n = 1, order_by = temporal) - 1,
-           va_ind_pc_gr = lag(va_ind_pc, n = 0, order_by = temporal) /
-             lag(va_ind_pc, n = 1, order_by = temporal) - 1,
-           va_ser_pc_gr = lag(va_ser_pc, n = 0, order_by = temporal) /
-             lag(va_ser_pc, n = 1, order_by = temporal) - 1,
-           gdp_pc_gr = lag(gdp_pc, n = 0, order_by = temporal) /
-             lag(gdp_pc, n = 1, order_by = temporal) - 1) %>%
+    mutate(gdp_pc_gr = (lag(gdp_pc, n = 0, order_by = temporal) / lag(gdp_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) - lag(temporal, n = 1, order_by = temporal))) - 1,
+      va_agr_pc_gr = (lag(va_agr_pc, n = 0, order_by = temporal) / lag(va_agr_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) - lag(temporal, n = 1, order_by = temporal))) - 1,
+           va_ind_pc_gr = (lag(va_ind_pc, n = 0, order_by = temporal) / lag(va_ind_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) - lag(temporal, n = 1, order_by = temporal))) - 1,
+           va_ser_pc_gr = (lag(va_ser_pc, n = 0, order_by = temporal) / lag(va_ser_pc, n = 1, order_by = temporal))^(1/(lag(temporal, n = 0, order_by = temporal) - lag(temporal, n = 1, order_by = temporal))) - 1) %>%
     ungroup()
 
   # add recession dummy: 1 in case of a recession
@@ -178,8 +174,8 @@ if(!file.exists("output/common/df.rda")){
   df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
   df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
-  # compute ratio of country level GDP per capita to global GDP per capita as a
   # measure of convergence
+  # compute ratio of country level GDP per capita to global GDP per capita as a
   df <- group_by(df, scenario, temporal) %>%
     mutate(gdp_pc_glob = sum(gdp, na.rm = TRUE)/sum(pop, na.rm = TRUE)) %>%
     ungroup() %>%
