@@ -321,17 +321,20 @@ plot_hist_fit_pred <- function(x, country, end_year){
   # browser()
   p <- ggplot() +
     #agriculture
-    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_agr_pc), colour = "green") +
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_agr_pc),
+               colour = "green", shape = 0) +
     geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_agr_pc, group = scenario,
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_agr_pc_fit), colour = "green") +
     # industry
-    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ind_pc), colour = "brown") +
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ind_pc),
+               colour = "brown", shape = 2) +
     geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_ind_pc, group = scenario,
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ind_pc_fit), colour = "brown") +
     #services
-    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ser_pc), colour = "blue") +
+    geom_point(data = tmp_hist, aes(x = gdp_pc, y = va_ser_pc), colour = "blue",
+               shape = 3) +
     geom_line(data = tmp_scen, aes(x = gdp_pc, y = va_ser_pc, group = scenario,
                                    colour = scenario)) +
     geom_line(data = tmp_fit, aes(x = gdp_pc, y = va_ser_pc_fit), colour = "blue") +

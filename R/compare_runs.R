@@ -23,7 +23,7 @@ for(run in runs){
 countries <- g20
 
 for (country in countries){
-  try(p <- plot_hist_fit_pred(x  = result_all, country = country, end_year = 2030))
+  try(p <- plot_hist_fit_pred(x  = result_all, country = country, end_year = 2020))
   try(ggsave(plot = p, filename = file.path("output", "comparison",
                                         paste0("fit_", country, ".png")),
          width = 18, height = 10, units = "cm"))
