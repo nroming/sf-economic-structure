@@ -174,6 +174,11 @@ if(!file.exists("output/common/df.rda")){
   df[df$gdp_pc_gr > 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 0
   df[df$gdp_pc_gr <= 0 & !(is.na(df$gdp_pc_gr)), "recession"] <- 1
 
+  # above assignment of recession based on growth rates does result in NAs for
+  # the scenario values for 2010 and 2015
+  df <- mutate(df, recession = if_else(temporal %in% c(2010, 2015) &
+                                         scenario != "history", 0, recession))
+
   # measure of convergence
   # compute ratio of country level GDP per capita to global GDP per capita as a
   df <- group_by(df, scenario, temporal) %>%
