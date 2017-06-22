@@ -32,7 +32,7 @@ settings$exp_name <- "base"
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "temporal")
 
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -49,7 +49,7 @@ settings$exp_name <- "conv"
 settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "temporal", "ratio_gdp_pc2glob")
 
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -69,7 +69,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
 # use weighed regression
 settings$regression_weights <- "pop"
 
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # prepare run
 settings <- prepare_run(settings)
@@ -88,7 +88,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "nx_pc_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # use weighed regression
 settings$regression_weights <- "pop"
@@ -110,7 +110,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # use weighed regression
 settings$regression_weights <- "gdp"
@@ -132,7 +132,7 @@ settings$regressors <- c("gdp_pc", "I(gdp_pc^2)", "spatial", "recession",
                          "pop_dens", "urb_share", "nx_pc_share", "temporal", "ratio_gdp_pc2glob")
 
 # # other modifications
-settings$plotting <- TRUE
+settings$plotting <- FALSE
 
 # use weighed regression
 settings$regression_weights <- "gdp"
