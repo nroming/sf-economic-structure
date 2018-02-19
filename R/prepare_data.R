@@ -217,7 +217,7 @@ gdppc_comp <- dcast(gdppc_comp, spatial + temporal ~ scenario, value.var = "gdp_
 
 # interpolation of missing values
 gdppc_comp <- group_by(gdppc_comp, spatial) %>%
-  mutate(SSP2 = na.approx(SSP2, along = temporal)) %>%
+  mutate(SSP2 = na.approx(SSP2, along = temporal, na.rm = FALSE)) %>%
   ungroup() %>%
   filter(temporal %in% c(2010, 2014))
 
