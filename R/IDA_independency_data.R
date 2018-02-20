@@ -23,7 +23,7 @@ WDI_2015 <- left_join(WDI_vars, WDI_2015)
 names(WDI_2015)[names(WDI_2015) == "Country Code"] <- "wb"
 
 # only keep country and global values, drop regional aggregates
-WDI_2015 <- filter(WDI_2015, wb %in% c(countrycode_data$wb, "WLD"))
+WDI_2015 <- filter(WDI_2015, wb %in% c(codelist$wb, "WLD"))
 
 # drop columns
 WDI_2015 <- select(WDI_2015, variable, is_unit, target_unit, conversion, wb, 9:64)
